@@ -5,6 +5,7 @@ import { history } from "./../App";
 import { Button } from "react-bootstrap";
 import { actionFindTracks, actionFindUser } from "./../actions/index";
 import { backURL } from "./../helpers/index";
+import { Audio } from "./../components/Audio";
 
 const Search = ({ auth, actionTracks, actionUser }) => {
   return (
@@ -14,6 +15,7 @@ const Search = ({ auth, actionTracks, actionUser }) => {
           <h1>Поиск по сайту</h1>
           <SearchField />
           <Button onClick={() => actionTracks()}>Tracks</Button>
+          <Audio />
         </div>
       ) : (
         <div className="d-block mx-auto mt-2 container w-50">

@@ -1,9 +1,11 @@
 @import "~bootstrap/scss/bootstrap";
+$mainColor: #0b5ed7;
 
 body {
   background-color: #34393d;
   color: white;
   font-family: "Catamaran", sans-serif;
+  height: 2000px;
 }
 
 .spoilerText {
@@ -57,6 +59,32 @@ body {
 
 .MainContent {
   margin-left: 7%;
+}
+
+.player-container {
+  z-index: 1;
+  margin-bottom: -72px;
+  padding: 25px 0;
+  transition: box-shadow 400ms;
+  display: flex;
+  justify-content: space-around;
+}
+
+.player-container > div {
+  text-decoration: underline $mainColor;
+}
+
+.sticky {
+  position: fixed;
+  width: 70%;
+  left: 20%;
+  top: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.sticky > div {
+  text-decoration: none;
+  opacity: 0.7;
 }
 
 .btn-circle {
