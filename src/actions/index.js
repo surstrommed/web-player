@@ -1,40 +1,5 @@
 import { backURL, gql } from "../helpers";
 
-export const actionPending = (name) => ({
-  type: "PROMISE",
-  status: "PENDING",
-  name,
-});
-
-export const actionResolved = (name, payload) => ({
-  type: "PROMISE",
-  status: "RESOLVED",
-  name,
-  payload,
-});
-
-export const actionRejected = (name, error) => ({
-  type: "PROMISE",
-  status: "REJECTED",
-  name,
-  error,
-});
-
-export const actionAuthLogin = (token) => ({ type: "AUTH_LOGIN", token });
-
-export const actionAuthLogout = () => ({ type: "AUTH_LOGOUT" });
-
-export const actionPromise = (name, promise) => async (dispatch) => {
-  dispatch(actionPending(name));
-  try {
-    let data = await promise;
-    dispatch(actionResolved(name, data));
-    return data;
-  } catch (error) {
-    dispatch(actionRejected(name, error));
-  }
-};
-
 export const actionUserUpdate = ({ _id, login, password, nick, avatar }) =>
   actionPromise(
     "userUpdate",
@@ -63,14 +28,15 @@ export const actionChangePassword = (login, password, newPassword) =>
   actionPromise(
     "changePassword",
     gql(
-      `query changePass($login:String!, $password:String!, $newPassword:String!){
+      `mutation changePass($login:String!, $password:String!, $newPassword:String!){
         changePassword(login:$login, password: $password, newPassword: $newPassword)
       }`,
-      { login, password, newPassword }
+      { login, password, newPassword },
+      true
     )
   );
 
-const actionLogin = (login, password) =>
+export const actionLogin = (login, password) =>
   actionPromise(
     "login",
     gql(
@@ -81,7 +47,7 @@ const actionLogin = (login, password) =>
     )
   );
 
-const actionRegister = (login, password) =>
+export const actionRegister = (login, password) =>
   actionPromise(
     "registration",
     gql(
@@ -111,41 +77,13 @@ export const actionFindUser = (_id) =>
     )
   );
 
-export const actionAboutMe = () => async (dispatch, getState) => {
-  let { id } = getState().auth.payload.sub;
-  await dispatch(actionFindUser(id));
-};
-
-export const actionFullLogin = (l, p) => async (dispatch) => {
-  let token = await dispatch(actionLogin(l, p));
-  if (token) {
-    await dispatch(actionAuthLogin(token));
-    await dispatch(actionAboutMe());
-  }
-};
-
-export const actionFullRegister = (l, p) => async (dispatch) => {
-  let { _id } = await dispatch(actionRegister(l, p));
-  if (_id) {
-    let nick = l;
-    if (nick.includes("@")) {
-      nick = nick.substring(0, nick.indexOf("@"));
-      if (nick.length > 8) {
-        nick = nick.substring(0, 8);
-      }
-    }
-    await dispatch(actionUserUpdate({ _id, nick }));
-    await dispatch(actionFullLogin(l, p));
-  }
-};
-
 export const actionFindTracks = () =>
   actionPromise(
     "tracks",
     gql(
       `query findTracks($q:String){
         TrackFind(query:$q){
-          _id url owner {
+          _id url originalFileName owner {
             _id login nick
           }
         }
@@ -171,7 +109,7 @@ export const actionFindUsers = () =>
     )
   );
 
-const actionUploadPhoto = (file) => {
+export const actionUploadPhoto = (file) => {
   let fd = new FormData();
   fd.append("photo", file);
   return actionPromise(
@@ -186,9 +124,134 @@ const actionUploadPhoto = (file) => {
   );
 };
 
-export const actionSetAvatar = (file) => async (dispatch, getState) => {
-  let { _id } = await dispatch(actionUploadPhoto(file));
-  let { id } = getState().auth.payload.sub;
-  await dispatch(actionUserUpdate({ _id: id, avatar: { _id } }));
-  await dispatch(actionAboutMe());
-};
+// ================================================
+
+export const actionPending = (name) => ({
+  type: "PROMISE",
+  status: "PENDING",
+  name,
+});
+
+export const actionResolved = (name, payload) => ({
+  type: "PROMISE",
+  status: "RESOLVED",
+  name,
+  payload,
+});
+
+export const actionRejected = (name, error) => ({
+  type: "PROMISE",
+  status: "REJECTED",
+  name,
+  error,
+});
+
+export const actionAuthLogin = (token) => ({ type: "AUTH_LOGIN", token });
+
+export const actionAuthLogout = () => ({ type: "AUTH_LOGOUT" });
+
+export const actionPromise = (name, promise) => ({
+  type: "PROMISE_START",
+  name,
+  promise,
+});
+// async (dispatch) => {
+//   dispatch(actionPending(name));
+//   try {
+//     let data = await promise;
+//     dispatch(actionResolved(name, data));
+//     return data;
+//   } catch (error) {
+//     dispatch(actionRejected(name, error));
+//   }
+// };
+
+export const actionAboutMe = () => ({
+  type: "ABOUT_ME",
+});
+// => async (dispatch, getState) => {
+//   let { id } = getState().auth.payload.sub; //select()
+//   await dispatch(actionFindUser(id));       //call(promiseWatcher, actionFindUser())
+// };
+
+export const actionFullLogin = (login, password) => ({
+  type: "FULL_LOGIN",
+  login,
+  password,
+});
+
+// async (dispatch) => {
+//   let token = await dispatch(actionLogin(l, p));
+//   if (token) {
+//     await dispatch(actionAuthLogin(token));
+//     await dispatch(actionAboutMe());
+//   }
+// };
+
+export const actionFullRegister = (login, password) => ({
+  type: "FULL_REGISTER",
+  login,
+  password,
+});
+// async (dispatch) => {
+//   let { _id } = await dispatch(actionRegister(l, p));
+//   if (_id) {
+//     let nick = l;
+//     if (nick.includes("@")) {
+//       nick = nick.substring(0, nick.indexOf("@"));
+//       if (nick.length > 8) {
+//         nick = nick.substring(0, 8);
+//       }
+//     }
+//     await dispatch(actionFullLogin(l, p));
+//     await dispatch(actionUserUpdate({ _id, nick }));
+//   }
+// };
+
+export const actionAllTracks = () => ({
+  type: "FIND_TRACKS",
+  // name,
+  // promise,
+});
+
+export const actionSetAvatar = (file) => ({
+  type: "SET_AVATAR",
+  file,
+});
+// async (dispatch, getState) => {
+//   let { _id } = await dispatch(actionUploadPhoto(file));
+//   let { id } = getState().auth.payload.sub;
+//   await dispatch(actionUserUpdate({ _id: id, avatar: { _id } }));
+//   await dispatch(actionAboutMe());
+// };
+
+export const actionSetNickname = ({ _id, nick }) => ({
+  type: "SET_NICKNAME",
+  _id,
+  nick,
+});
+// async (dispatch) => {
+//   await dispatch(actionUserUpdate({ _id, nick }));
+//   await dispatch(actionAboutMe());
+// };
+
+export const actionSetEmail = ({ _id, login }) => ({
+  type: "SET_EMAIL",
+  _id,
+  login,
+});
+// async (dispatch) => {
+//   await dispatch(actionUserUpdate({ _id, login }));
+//   await dispatch(actionAboutMe());
+// };
+
+export const actionSetNewPassword = (login, password, newPassword) => ({
+  type: "SET_NEW_PASSWORD",
+  login,
+  password,
+  newPassword,
+});
+// async (dispatch) => {
+//   await dispatch(actionChangePassword(login, password, newPassword));
+//   await dispatch(actionAboutMe());
+// };

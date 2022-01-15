@@ -11,24 +11,26 @@ import {
   validateNickname,
 } from "./../helpers/index";
 import {
-  actionUserUpdate,
-  actionAboutMe,
-  actionChangePassword,
+  actionSetNickname,
+  actionSetEmail,
+  actionSetNewPassword,
 } from "./../actions/index";
 import { Loader } from "../components/Loader";
 import { CMyDropzone } from "../components/Dropzone";
 import { Spoiler } from "../components/Spoiler";
 
-const Profile = ({ auth, promise, actionUpdate, changePassword, aboutMe }) => {
+const Profile = ({
+  auth,
+  promise,
+  nickUpdate,
+  emailUpdate,
+  changePassword,
+}) => {
   const [login, setLogin] = useState("");
   const [nick, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [passwordShown, setPasswordShown] = useState(false);
-
-  const togglePassword = () => {
-    setPasswordShown(!passwordShown);
-  };
 
   return promise?.user?.status === "PENDING" ? (
     <Loader />
@@ -49,7 +51,7 @@ const Profile = ({ auth, promise, actionUpdate, changePassword, aboutMe }) => {
                 <form
                   action="/upload"
                   method="post"
-                  enctype="multipart/form-data"
+                  encType="multipart/form-data"
                   id="form"
                 >
                   <img
@@ -130,13 +132,9 @@ const Profile = ({ auth, promise, actionUpdate, changePassword, aboutMe }) => {
                             ? false
                             : true
                         }
-                        onClick={() => {
-                          actionUpdate({
-                            _id: promise?.user?.payload?._id,
-                            nick,
-                          });
-                          aboutMe();
-                        }}
+                        onClick={() =>
+                          nickUpdate({ _id: promise?.user?.payload?._id, nick })
+                        }
                       >
                         Сохранить
                       </Button>
@@ -202,13 +200,12 @@ const Profile = ({ auth, promise, actionUpdate, changePassword, aboutMe }) => {
                             ? false
                             : true
                         }
-                        onClick={() => {
-                          actionUpdate({
+                        onClick={() =>
+                          emailUpdate({
                             _id: promise?.user?.payload?._id,
                             login,
-                          });
-                          aboutMe();
-                        }}
+                          })
+                        }
                       >
                         Сохранить
                       </Button>
@@ -253,7 +250,7 @@ const Profile = ({ auth, promise, actionUpdate, changePassword, aboutMe }) => {
                       <Button
                         className="mt-2"
                         variant="secondary"
-                        onClick={togglePassword}
+                        onClick={() => setPasswordShown(!passwordShown)}
                       >
                         {`${passwordShown ? "Hide" : "Show"} passwords`}
                       </Button>
@@ -280,14 +277,13 @@ const Profile = ({ auth, promise, actionUpdate, changePassword, aboutMe }) => {
                       <Button
                         variant="success"
                         disabled={validatePassword(newPassword) ? false : true}
-                        onClick={() => {
+                        onClick={() =>
                           changePassword(
                             promise?.user?.payload?.login,
                             password,
                             newPassword
-                          );
-                          aboutMe();
-                        }}
+                          )
+                        }
                       >
                         Сохранить
                       </Button>
@@ -311,8 +307,8 @@ const Profile = ({ auth, promise, actionUpdate, changePassword, aboutMe }) => {
 export const CProfile = connect(
   (state) => ({ auth: state.auth, promise: state.promise }),
   {
-    actionUpdate: actionUserUpdate,
-    changePassword: actionChangePassword,
-    aboutMe: actionAboutMe,
+    emailUpdate: actionSetEmail,
+    nickUpdate: actionSetNickname,
+    changePassword: actionSetNewPassword,
   }
 )(Profile);

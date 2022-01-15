@@ -13,9 +13,6 @@ const Auth = ({ auth, promise, actionLogOut }) => {
   ) {
     history.push("/");
   }
-  if (auth.token) {
-    localStorage.authToken = auth.token;
-  }
   return (
     <>
       {auth.payload ? (

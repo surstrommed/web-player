@@ -37,3 +37,69 @@ export function authReducer(state, { type, token }) {
   }
   return state;
 }
+
+export const localStoredReducer =
+  (reducer, localStorageName) => (state, action) => {
+    if (!state && localStorage[localStorageName]) {
+      return JSON.parse(localStorage[localStorageName]);
+    } else {
+      let newState = reducer(state, action);
+      localStorage.setItem(localStorageName, JSON.stringify(newState));
+      return newState;
+    }
+  };
+
+// track: {_id, url, originalFileName}
+// playlist: {_id, name, tracks: [{_id}, {_id}, ...tracks]}
+
+export const playerReducer = (
+  state = {},
+  {
+    type,
+    track,
+    isPlaying,
+    isStopped,
+    duration,
+    playlist,
+    playlistIndex,
+    currentTime,
+    volume,
+  }
+) => {
+  if (type === "LOAD_TRACK") {
+    return {
+      ...state,
+      track,
+      duration,
+      playlist,
+      playlistIndex,
+    };
+  }
+  if (type === "PLAY_TRACK") {
+    return {
+      ...state,
+      isPlaying,
+      isStopped: !isPlaying,
+    };
+  }
+  if (type === "STOP_TRACK") {
+    return {
+      ...state,
+      isStopped,
+      isPlaying: !isStopped,
+    };
+  }
+  if (type === "VOLUME_TRACK") {
+    return {
+      ...state,
+      volume,
+    };
+  }
+  if (type === "TIME_TRACK") {
+    return {
+      ...state,
+      currentTime,
+    };
+  }
+  return state;
+};

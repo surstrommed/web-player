@@ -10,14 +10,14 @@ export const jwtDecode = (token) => {
 
 export const getGQL =
   (url) =>
-  async (query, variables = {}) => {
+  async (query, variables = {}, skip = false) => {
     let obj = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: localStorage.authToken
-          ? "Bearer " + localStorage.authToken
-          : {},
+        ...(localStorage.authToken && !skip
+          ? { Authorization: "Bearer " + localStorage.authToken }
+          : {}),
       },
       body: JSON.stringify({ query, variables }),
     });
