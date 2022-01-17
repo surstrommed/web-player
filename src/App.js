@@ -8,12 +8,14 @@ import {
   promiseReducer,
   authReducer,
   localStoredReducer,
+  playerReducer,
 } from "./reducers/index";
 import { Sidebar } from "./components/Sidebar";
 import "./App.scss";
 import createSagaMiddleware from "redux-saga";
 import { all, takeEvery, put, call, select } from "redux-saga/effects";
 import * as actions from "./actions";
+import { CAudioController } from "./components/AudioController";
 export const history = createBrowserHistory();
 
 const sagaMiddleware = createSagaMiddleware();
@@ -22,6 +24,7 @@ export const store = createStore(
   combineReducers({
     promise: localStoredReducer(promiseReducer, "promise"),
     auth: localStoredReducer(authReducer, "auth"),
+    player: localStoredReducer(playerReducer, "player"),
   }),
   applyMiddleware(sagaMiddleware)
 );
@@ -45,7 +48,7 @@ function* promiseWatcher() {
 function* aboutMeWorker() {
   // let { id } = getState().auth.payload.sub;
   // await dispatch(actionFindUser(id));
-  let { id } = yield select().auth.payload.sub;
+  let { id } = yield select().auth?.payload?.sub;
   yield call(promiseWatcher, actions.actionFindUser(id));
 }
 
@@ -150,6 +153,33 @@ function* setNewPasswordWatcher() {
   yield takeEvery("SET_NEW_PASSWORD", setNewPasswordWorker);
 }
 
+function* audioPlayWorker({ isPlaying }) {
+  yield put(actions.actionPlayAudio(isPlaying));
+  yield put(actions.actionAboutMe());
+}
+
+function* audioPlayWatcher() {
+  yield takeEvery("PLAY_TRACK", audioPlayWorker);
+}
+
+function* audioPauseWorker({ isPaused }) {
+  yield put(actions.actionPauseAudio(isPaused));
+  yield put(actions.actionAboutMe());
+}
+
+function* audioPauseWatcher() {
+  yield takeEvery("PAUSE_TRACK", audioPauseWorker);
+}
+
+function* audioVolumeWorker({ volume }) {
+  yield put(actions.actionVolumeAudio(volume));
+  yield put(actions.actionAboutMe());
+}
+
+function* audioVolumeWatcher() {
+  yield takeEvery("VOLUME_TRACK", audioVolumeWorker);
+}
+
 if (localStorage.authToken) {
   store.dispatch(actions.actionAboutMe());
 }
@@ -175,6 +205,9 @@ function* rootSaga() {
     setNicknameWatcher(),
     setEmailWatcher(),
     setNewPasswordWatcher(),
+    audioPlayWatcher(),
+    audioPauseWatcher(),
+    audioVolumeWatcher(),
   ]);
 }
 
@@ -194,4 +227,5 @@ function App() {
   );
 }
 
+// <CAudioController />
 export default App;

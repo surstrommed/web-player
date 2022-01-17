@@ -1,7 +1,6 @@
 import {
   CDBSidebar,
   CDBSidebarContent,
-  CDBSidebarFooter,
   CDBSidebarHeader,
   CDBSidebarMenu,
   CDBSidebarMenuItem,
@@ -37,15 +36,16 @@ export const Sidebar = () => {
             </NavLink>
           </CDBSidebarMenu>
         </CDBSidebarContent>
-        <CDBSidebarFooter
-          className="m-1"
-          style={{
-            textAlign: "center",
-          }}
-        >
-          Navy Web Player
-        </CDBSidebarFooter>
       </CDBSidebar>
     </div>
   );
 };
+
+// <CDBSidebarFooter
+// className="m-1"
+// style={{
+//   textAlign: "center",
+// }}
+// >
+// Navy Web Player
+// </CDBSidebarFooter>

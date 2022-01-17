@@ -3,7 +3,7 @@ import { AuthCheck } from "./../components/AuthCheck";
 import { history } from "./../App";
 import { actionFindTracks, actionFindUser } from "./../actions/index";
 import { CMyDropzone } from "../components/Dropzone";
-import { Track } from "../components/Track";
+import { CTrack } from "../components/Track";
 import { PlayerHeader } from "./../components/PlayerHeader";
 import { Loader } from "./../components/Loader";
 
@@ -17,11 +17,10 @@ const Library = ({ auth, promise, actionTracks, actionUser }) => {
           </h1>
           <CMyDropzone />
           <PlayerHeader personal />
-          <Track />
           {promise?.tracks?.payload ? (
             promise.tracks.payload.map((track, index) =>
               track.owner._id === auth.payload.sub.id ? (
-                <Track audio={track} index={index} key={Math.random()} />
+                <CTrack audio={track} index={index} key={Math.random()} />
               ) : (
                 <h2>В вашей библиотеке нет треков.</h2>
               )

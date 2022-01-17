@@ -58,7 +58,7 @@ export const playerReducer = (
     type,
     track,
     isPlaying,
-    isStopped,
+    isPaused,
     duration,
     playlist,
     playlistIndex,
@@ -79,14 +79,14 @@ export const playerReducer = (
     return {
       ...state,
       isPlaying,
-      isStopped: !isPlaying,
+      isPaused: !isPlaying,
     };
   }
-  if (type === "STOP_TRACK") {
+  if (type === "PAUSE_TRACK") {
     return {
       ...state,
-      isStopped,
-      isPlaying: !isStopped,
+      isPaused,
+      isPlaying: !isPaused,
     };
   }
   if (type === "VOLUME_TRACK") {

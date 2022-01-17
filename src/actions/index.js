@@ -124,6 +124,44 @@ export const actionUploadPhoto = (file) => {
   );
 };
 
+export const actionUserPlaylists = (_id) => {
+  actionPromise(
+    "userPlaylists",
+    gql(
+      `
+          query getPlaylistByOwnerId($ownerId:String!) {
+              PlaylistFind(query: $ownerId) {
+                  _id, name
+              }
+          }
+      `,
+      { ownerId: JSON.stringify([{ ___owner: _id }]) }
+    )
+  );
+};
+
+export const actionUserTracks = (_id) => {
+  return actionPromise(
+    "userTracks",
+    gql(
+      `
+          query getUserTracks($ownerId: String!) {
+              TrackFind(query: $ownerId) {
+                  _id,
+                  id3 {
+                      title, artist
+                  }
+                  playlists {
+                      _id, name
+                  }
+              }
+          }
+      `,
+      { ownerId: JSON.stringify([{ ___owner: _id }]) }
+    )
+  );
+};
+
 // ================================================
 
 export const actionPending = (name) => ({
@@ -255,3 +293,26 @@ export const actionSetNewPassword = (login, password, newPassword) => ({
 //   await dispatch(actionChangePassword(login, password, newPassword));
 //   await dispatch(actionAboutMe());
 // };
+
+export const actionLoadAudio = (track, duration, playlist, playlistIndex) => ({
+  type: "LOAD_TRACK",
+  track,
+  duration,
+  playlist,
+  playlistIndex,
+});
+
+export const actionPlayAudio = (isPlaying) => ({
+  type: "PLAY_TRACK",
+  isPlaying,
+});
+
+export const actionPauseAudio = (isPaused) => ({
+  type: "PAUSE_TRACK",
+  isPaused,
+});
+
+export const actionVolumeAudio = (volume) => ({
+  type: "VOLUME_TRACK",
+  volume,
+});

@@ -13,7 +13,7 @@ export const Loader = () => {
         size="sm"
         role="status"
         aria-hidden="true"
-      />
+      />{" "}
       Loading...
     </Button>
   );

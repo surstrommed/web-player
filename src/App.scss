@@ -67,6 +67,7 @@ body {
   padding: 25px 0;
   transition: box-shadow 400ms;
   display: flex;
+  font-size: 16px;
 }
 
 .player-container > span {
@@ -75,12 +76,9 @@ body {
 
 .sticky {
   position: fixed;
-  width: 10%;
-  top: 0;
-}
-
-.sticky > span {
-  text-decoration: none;
+  display: inline-block;
+  width: 50%;
+  font-size: 12px;
 }
 
 .header-section > div {
@@ -89,6 +87,41 @@ body {
 
 .customAudio {
   width: 70vh;
+}
+
+.AudioController {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  background-color: #212529;
+  width: 100%;
+  z-index: 1000;
+  height: 15vh;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  .SongName {
+    margin-left: 1vh;
+    width: 25%;
+  }
+  .Buttons {
+    width: 70%;
+    text-align: center;
+    align-self: center;
+  }
+  .Volume {
+    width: 15%;
+    input {
+      width: 50%;
+    }
+  }
+  .Duration {
+    span {
+      margin-left: 1vh;
+      font-size: 12px;
+    }
+  }
 }
 
 .btn-circle {

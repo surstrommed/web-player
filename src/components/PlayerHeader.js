@@ -9,14 +9,11 @@ export const PlayerHeader = ({ personal }) => {
   }, []);
 
   return (
-    <nav
-      className={`mt-5 navbar ${offset > 50 ? "sticky" : ""}`}
-      style={{ width: "110%" }}
-    >
+    <nav className={`mt-5 navbar ${offset > 50 ? "sticky" : ""}`}>
       <div className="container-fluid player-container">
         <span>#</span>
         <span>Название</span>
-        <span>{personal ? "Плейлист" : "Владелец"}</span>
+        <span>{personal ? "Плейлист" : "Информация"}</span>
       </div>
     </nav>
   );

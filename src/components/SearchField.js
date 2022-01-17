@@ -12,9 +12,10 @@ export const SearchField = () => {
         aria-label="Поиск"
         aria-describedby="search-addon"
       />
-      <Button variant="primary" id="search-addon">
-        <FontAwesomeIcon icon={faSearch} />
-      </Button>
     </div>
   );
 };
+
+// <Button variant="primary" id="search-addon">
+// <FontAwesomeIcon icon={faSearch} />
+// </Button>
