@@ -41,13 +41,7 @@ const Auth = ({ auth, promise, actionLogOut }) => {
           >
             Профиль
           </NavDropdown.Item>
-          <NavDropdown.Item
-            componentclass={Link}
-            href="/settings"
-            to={`/settings`}
-          >
-            Настройки
-          </NavDropdown.Item>
+
           <NavDropdown.Divider />
           <NavDropdown.Item as="button" onClick={() => actionLogOut()}>
             Выйти
@@ -66,6 +60,14 @@ const Auth = ({ auth, promise, actionLogOut }) => {
     </>
   );
 };
+
+// <NavDropdown.Item
+// componentclass={Link}
+// href="/settings"
+// to={`/settings`}
+// >
+// Настройки
+// </NavDropdown.Item>
 
 export const CAuth = connect(
   (state) => ({ auth: state.auth, promise: state.promise }),

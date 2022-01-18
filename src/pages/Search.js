@@ -14,13 +14,21 @@ const Search = ({ auth, promise }) => {
         <div className="d-block mx-auto mt-2 container w-50">
           <h1 className="text-center">Поиск по сайту</h1>
           <SearchField />
-          <PlayerHeader />
-          {promise?.tracks?.payload ? (
+          {promise?.tracks?.payload?.length !== 0 ? <PlayerHeader /> : null}
+          {promise.tracks.status === "PENDING" ? (
+            <Loader />
+          ) : promise?.tracks?.payload &&
+            promise?.tracks?.payload?.length !== 0 ? (
             promise.tracks.payload.map((track, index) => (
               <CTrack audio={track} index={index} key={Math.random()} />
             ))
           ) : (
-            <Loader />
+            <h2 className="mt-5 text-center">
+              {promise?.user?.payload?.nick
+                ? promise?.user?.payload?.nick
+                : "user"}
+              , на сайте не обнаружено треков.
+            </h2>
           )}
         </div>
       ) : (
@@ -34,8 +42,5 @@ const Search = ({ auth, promise }) => {
 
 export const CSearch = connect(
   (state) => ({ auth: state.auth, promise: state.promise }),
-  {
-    actionTracks: actionFindTracks,
-    actionUser: actionFindUser,
-  }
+  null
 )(Search);

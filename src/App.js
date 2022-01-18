@@ -40,6 +40,8 @@ function* rootSaga() {
     loginWatcher(),
     registerWatcher(),
     findTracksWatcher(),
+    findPlaylistsWatcher(),
+    findUserTrackssWatcher(),
     setAvatarWatcher(),
     setNicknameWatcher(),
     setEmailWatcher(),
@@ -75,7 +77,7 @@ function* aboutMeWorker() {
   let { auth } = yield select();
   if (auth) {
     let { id } = auth?.payload?.sub;
-    yield call(promiseWatcher, actions.actionFindUser(id));
+    yield call(promiseWorker, actions.actionFindUser(id));
   }
 }
 
@@ -117,11 +119,11 @@ function* loginWatcher() {
 }
 
 function* registerWorker({ login, password }) {
-  let { _id } = yield call(
-    promiseWorker,
-    actions.actionRegister(login, password)
-  );
-  if (_id) {
+  yield call(promiseWorker, actions.actionRegister(login, password));
+  let token = yield call(promiseWorker, actions.actionLogin(login, password));
+  if (token) {
+    yield put(actions.actionAuthLogin(token));
+    let { auth } = yield select();
     let nick = login;
     if (nick.includes("@")) {
       nick = nick.substring(0, nick.indexOf("@"));
@@ -129,8 +131,9 @@ function* registerWorker({ login, password }) {
         nick = nick.substring(0, 8);
       }
     }
-    yield call(promiseWorker, actions.actionLogin(login, password));
-    yield call(promiseWorker, actions.actionUserUpdate({ _id, nick }));
+    let { id } = auth?.payload?.sub;
+    yield call(promiseWorker, actions.actionUserUpdate({ _id: id, nick }));
+    yield put(actions.actionAboutMe());
   }
 }
 
@@ -139,11 +142,43 @@ function* registerWatcher() {
 }
 
 function* findTracksWorker() {
-  yield call(promiseWatcher, actions.actionFindTracks());
+  yield call(promiseWorker, actions.actionFindTracks());
 }
 
 function* findTracksWatcher() {
-  yield takeEvery("FIND_TRACKS", findTracksWorker);
+  yield takeEvery("FIND_ALL_TRACKS", findTracksWorker);
+}
+
+if (localStorage.authToken && history.location.pathname === "/search") {
+  store.dispatch(actions.actionAllTracks());
+}
+
+function* findUserTracksWorker({ _id }) {
+  yield call(promiseWorker, actions.actionUserTracks(_id));
+}
+
+function* findUserTrackssWatcher() {
+  yield takeEvery("FIND_USER_TRACKS", findUserTracksWorker);
+}
+
+if (localStorage.authToken && history.location.pathname === "/library") {
+  let { auth } = store.getState();
+  if (auth) {
+    // let { id } = auth?.payload?.sub;
+    store.dispatch(actions.actionTracksUser("5fe35e5be926687ee86b0a49"));
+  }
+}
+
+function* findPlaylistsWorker({ _id }) {
+  yield call(promiseWorker, actions.actionUserPlaylists(_id));
+}
+
+function* findPlaylistsWatcher() {
+  yield takeEvery("FIND_PLAYLISTS", findPlaylistsWorker);
+}
+
+if (localStorage.authToken && history.location.pathname === "/") {
+  store.dispatch(actions.actionAllPlaylists());
 }
 
 function* setAvatarWorker({ file }) {
@@ -153,14 +188,16 @@ function* setAvatarWorker({ file }) {
   //   await dispatch(actionUserUpdate({ _id: id, avatar: { _id } }));
   //   await dispatch(actionAboutMe());
   // };
-  let { _id } = yield call(promiseWatcher, actions.actionUploadFile(file)); //upload file
-  let { id } = yield select().auth.payload.sub;
-  console.log("Set avatar");
-  yield call(
-    promiseWatcher,
-    actions.actionUserUpdate({ _id: id, avatar: { _id } })
-  );
-  yield put(actions.actionAboutMe());
+  let { _id } = yield call(promiseWorker, actions.actionUploadFile(file));
+  let { auth } = yield select();
+  if (auth) {
+    let { id } = auth?.payload?.sub;
+    yield call(
+      promiseWorker,
+      actions.actionUserUpdate({ _id: id, avatar: { _id } })
+    );
+    yield put(actions.actionAboutMe());
+  }
 }
 
 function* setAvatarWatcher() {
@@ -170,7 +207,7 @@ function* setAvatarWatcher() {
 function* setNicknameWorker({ _id, nick }) {
   //   await dispatch(actionUserUpdate({ _id, nick }));
   //   await dispatch(actionAboutMe());
-  yield call(promiseWatcher, actions.actionUserUpdate({ _id, nick }));
+  yield call(promiseWorker, actions.actionUserUpdate({ _id, nick }));
   yield put(actions.actionAboutMe());
 }
 
@@ -181,7 +218,7 @@ function* setNicknameWatcher() {
 function* setEmailWorker({ _id, login }) {
   //   await dispatch(actionUserUpdate({ _id, nick }));
   //   await dispatch(actionAboutMe());
-  yield call(promiseWatcher, actions.actionUserUpdate({ _id, login }));
+  yield call(promiseWorker, actions.actionUserUpdate({ _id, login }));
   yield put(actions.actionAboutMe());
 }
 
@@ -193,7 +230,7 @@ function* setNewPasswordWorker({ login, password, newPassword }) {
   //   await dispatch(actionChangePassword(login, password, newPassword));
   //   await dispatch(actionAboutMe());
   yield call(
-    promiseWatcher,
+    promiseWorker,
     actions.actionChangePassword(login, password, newPassword)
   );
   yield put(actions.actionAboutMe());
@@ -234,14 +271,6 @@ function* audioVolumeWorker({ volume }) {
 
 function* audioVolumeWatcher() {
   yield takeEvery("VOLUME_TRACK", audioVolumeWorker);
-}
-
-if (
-  localStorage.authToken &&
-  (history.location.pathname === "/search" ||
-    history.location.pathname === "/library")
-) {
-  store.dispatch(actions.actionFindTracks());
 }
 
 store.subscribe(() => console.log(store.getState()));

@@ -1,7 +1,7 @@
 import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
 import { backURL } from "../helpers/index";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { CAudioController } from "./AudioController";
 
 import {
@@ -19,10 +19,17 @@ const Track = ({
   pauseAudio,
   volumeAudio,
   player,
+  promise,
 }) => {
   const [reproduction, setReproduction] = useState(false);
   let track = audio?.url ? `${backURL}/${audio.url}` : undefined;
   let audioTrack = new Audio(track);
+  let duration, currentTime, volume;
+  audioTrack.addEventListener("loadeddata", () => {
+    duration = audioTrack.duration;
+    currentTime = audioTrack.currentTime;
+    volume = audioTrack.volume;
+  });
 
   if (reproduction) {
     audioTrack.play();
@@ -52,7 +59,6 @@ const Track = ({
         <Button
           onClick={() => {
             setReproduction(!reproduction);
-            loadAudio(audioTrack, audioTrack.duration);
             reproduction ? pauseAudio(true) : playAudio(true);
           }}
         >
@@ -68,17 +74,22 @@ const Track = ({
       </div>
       <CAudioController
         name={audio?.originalFileName}
-        currentTime={audioTrack.currentTime}
-        duration={player.duration}
-        volume={player.volume}
+        currentTime={currentTime}
+        duration={duration}
+        volume={volume}
       />
     </>
   );
 };
 
-export const CTrack = connect((state) => ({ player: state.player }), {
-  loadAudio: actionLoadAudio,
-  playAudio: actionPlayAudio,
-  pauseAudio: actionPauseAudio,
-  volumeAudio: actionVolumeAudio,
-})(Track);
+// <div>{promise?.tracks?.}</div>
+
+export const CTrack = connect(
+  (state) => ({ promise: state.promise, player: state.player }),
+  {
+    loadAudio: actionLoadAudio,
+    playAudio: actionPlayAudio,
+    pauseAudio: actionPauseAudio,
+    volumeAudio: actionVolumeAudio,
+  }
+)(Track);

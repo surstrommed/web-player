@@ -29,7 +29,9 @@ export const actionChangePassword = (login, password, newPassword) =>
     "changePassword",
     gql(
       `mutation changePass($login:String!, $password:String!, $newPassword:String!){
-        changePassword(login:$login, password: $password, newPassword: $newPassword)
+        changePassword(login:$login, password: $password, newPassword: $newPassword){
+          _id login
+        }
       }`,
       { login, password, newPassword },
       true
@@ -41,7 +43,7 @@ export const actionLogin = (login, password) =>
     "login",
     gql(
       `query log($login:String!, $password:String!){
-        login(login:$login, password: $password)
+        login(login: $login, password: $password)
       }`,
       { login, password }
     )
@@ -77,22 +79,6 @@ export const actionFindUser = (_id) =>
     )
   );
 
-export const actionFindTracks = () =>
-  actionPromise(
-    "tracks",
-    gql(
-      `query findTracks($q:String){
-        TrackFind(query:$q){
-          _id url originalFileName owner {
-            _id login nick
-          }
-        }
-      }
-  `,
-      { q: "[{}]" }
-    )
-  );
-
 export const actionFindUsers = () =>
   actionPromise(
     "users",
@@ -109,9 +95,9 @@ export const actionFindUsers = () =>
     )
   );
 
-export const actionUploadFile = (file) => {
+export const actionUploadFile = (file, type = "photo") => {
   let fd = new FormData();
-  fd.append("photo", file);
+  fd.append(type, file);
   return actionPromise(
     "uploadFile",
     fetch(`${backURL}/upload`, {
@@ -121,6 +107,55 @@ export const actionUploadFile = (file) => {
         : {},
       body: fd,
     }).then((res) => res.json())
+  );
+};
+
+export const actionFindTracks = () =>
+  actionPromise(
+    "tracks",
+    gql(
+      `query findTracks($q:String){
+        TrackFind(query: $q) {
+          _id url originalFileName
+          id3 {
+              title, artist
+          }
+          playlists {
+              _id, name
+          }
+          owner {
+            _id login nick
+          }
+      }
+      }
+  `,
+      { q: "[{}]" }
+    )
+  );
+
+export const actionUserTracks = (_id) => {
+  // поиск одного трека по его айди
+  return actionPromise(
+    "userTracks",
+    gql(
+      `
+          query getUserTracks($q: String!) {
+              TrackFind(query: $q) {
+                  _id url originalFileName
+                  id3 {
+                      title, artist
+                  }
+                  playlists {
+                      _id, name
+                  }
+                  owner {
+                    _id login nick
+                  }
+              }
+          }
+      `,
+      { q: JSON.stringify([{ _id }]) }
+    )
   );
 };
 
@@ -135,29 +170,7 @@ export const actionUserPlaylists = (_id) => {
               }
           }
       `,
-      { ownerId: JSON.stringify([{ ___owner: _id }]) }
-    )
-  );
-};
-
-export const actionUserTracks = (_id) => {
-  return actionPromise(
-    "userTracks",
-    gql(
-      `
-          query getUserTracks($ownerId: String!) {
-              TrackFind(query: $ownerId) {
-                  _id,
-                  id3 {
-                      title, artist
-                  }
-                  playlists {
-                      _id, name
-                  }
-              }
-          }
-      `,
-      { ownerId: JSON.stringify([{ ___owner: _id }]) }
+      { q: "[{}]" }
     )
   );
 };
@@ -247,9 +260,17 @@ export const actionFullRegister = (login, password) => ({
 // };
 
 export const actionAllTracks = () => ({
-  type: "FIND_TRACKS",
-  // name,
-  // promise,
+  type: "FIND_ALL_TRACKS",
+});
+
+export const actionAllPlaylists = (_id) => ({
+  type: "FIND_PLAYLISTS",
+  _id,
+});
+
+export const actionTracksUser = (_id) => ({
+  type: "FIND_USER_TRACKS",
+  _id,
 });
 
 export const actionSetAvatar = (file) => ({
