@@ -9,13 +9,14 @@ import {
   authReducer,
   localStoredReducer,
   playerReducer,
+  routeReducer,
 } from "./reducers/index";
 import { Sidebar } from "./components/Sidebar";
 import "./App.scss";
 import createSagaMiddleware from "redux-saga";
 import { all, takeEvery, put, call, select } from "redux-saga/effects";
 import * as actions from "./actions";
-import { CAudioController } from "./components/AudioController";
+import { gql } from "./helpers";
 export const history = createBrowserHistory();
 
 const sagaMiddleware = createSagaMiddleware();
@@ -25,9 +26,32 @@ export const store = createStore(
     promise: localStoredReducer(promiseReducer, "promise"),
     auth: localStoredReducer(authReducer, "auth"),
     player: localStoredReducer(playerReducer, "player"),
+    route: localStoredReducer(routeReducer, "route"),
+    // изменить условия на страницах на отображения по роутам
   }),
   applyMiddleware(sagaMiddleware)
 );
+
+function* rootSaga() {
+  yield all([
+    promiseWatcher(),
+    aboutMeWatcher(),
+    routeWatcher(),
+    loginWatcher(),
+    registerWatcher(),
+    findTracksWatcher(),
+    setAvatarWatcher(),
+    setNicknameWatcher(),
+    setEmailWatcher(),
+    setNewPasswordWatcher(),
+    audioPlayWatcher(),
+    audioPauseWatcher(),
+    audioVolumeWatcher(),
+    audioLoadWatcher(),
+  ]);
+}
+
+sagaMiddleware.run(rootSaga);
 
 function* promiseWorker(action) {
   const { name, promise } = action;
@@ -48,12 +72,36 @@ function* promiseWatcher() {
 function* aboutMeWorker() {
   // let { id } = getState().auth.payload.sub;
   // await dispatch(actionFindUser(id));
-  let { id } = yield select().auth?.payload?.sub;
-  yield call(promiseWatcher, actions.actionFindUser(id));
+  let { auth } = yield select();
+  if (auth) {
+    let { id } = auth?.payload?.sub;
+    yield call(promiseWatcher, actions.actionFindUser(id));
+  }
 }
 
 function* aboutMeWatcher() {
   yield takeEvery("ABOUT_ME", aboutMeWorker);
+}
+
+if (localStorage.authToken) {
+  store.dispatch(actions.actionAboutMe());
+}
+
+const queries = {};
+
+function* routeWorker({ match }) {
+  console.log(match);
+  if (match.path in queries) {
+    const { name, query, variables } = queries[match.path](match);
+    yield call(
+      promiseWorker,
+      actions.actionPromise(name, gql(query, variables))
+    );
+  }
+}
+
+function* routeWatcher() {
+  yield takeEvery("ROUTE", routeWorker);
 }
 
 function* loginWorker({ login, password }) {
@@ -105,12 +153,14 @@ function* setAvatarWorker({ file }) {
   //   await dispatch(actionUserUpdate({ _id: id, avatar: { _id } }));
   //   await dispatch(actionAboutMe());
   // };
-  let { _id } = yield call(promiseWatcher, actions.actionSetAvatar(file));
+  let { _id } = yield call(promiseWatcher, actions.actionUploadFile(file)); //upload file
   let { id } = yield select().auth.payload.sub;
+  console.log("Set avatar");
   yield call(
     promiseWatcher,
     actions.actionUserUpdate({ _id: id, avatar: { _id } })
   );
+  yield put(actions.actionAboutMe());
 }
 
 function* setAvatarWatcher() {
@@ -153,9 +203,17 @@ function* setNewPasswordWatcher() {
   yield takeEvery("SET_NEW_PASSWORD", setNewPasswordWorker);
 }
 
+function* audioLoadWorker({ track, duration, playlist, playlistIndex }) {
+  yield put(actions.actionLoadAudio(track, duration, playlist, playlistIndex));
+}
+
+function* audioLoadWatcher() {
+  yield takeEvery("LOAD_TRACK", audioLoadWorker);
+}
+
 function* audioPlayWorker({ isPlaying }) {
+  console.log("Play track");
   yield put(actions.actionPlayAudio(isPlaying));
-  yield put(actions.actionAboutMe());
 }
 
 function* audioPlayWatcher() {
@@ -164,7 +222,6 @@ function* audioPlayWatcher() {
 
 function* audioPauseWorker({ isPaused }) {
   yield put(actions.actionPauseAudio(isPaused));
-  yield put(actions.actionAboutMe());
 }
 
 function* audioPauseWatcher() {
@@ -173,15 +230,10 @@ function* audioPauseWatcher() {
 
 function* audioVolumeWorker({ volume }) {
   yield put(actions.actionVolumeAudio(volume));
-  yield put(actions.actionAboutMe());
 }
 
 function* audioVolumeWatcher() {
   yield takeEvery("VOLUME_TRACK", audioVolumeWorker);
-}
-
-if (localStorage.authToken) {
-  store.dispatch(actions.actionAboutMe());
 }
 
 if (
@@ -193,25 +245,6 @@ if (
 }
 
 store.subscribe(() => console.log(store.getState()));
-
-function* rootSaga() {
-  yield all([
-    promiseWatcher(),
-    loginWatcher(),
-    registerWatcher(),
-    aboutMeWatcher(),
-    findTracksWatcher(),
-    setAvatarWatcher(),
-    setNicknameWatcher(),
-    setEmailWatcher(),
-    setNewPasswordWatcher(),
-    audioPlayWatcher(),
-    audioPauseWatcher(),
-    audioVolumeWatcher(),
-  ]);
-}
-
-sagaMiddleware.run(rootSaga);
 
 function App() {
   return (
@@ -227,5 +260,4 @@ function App() {
   );
 }
 
-// <CAudioController />
 export default App;

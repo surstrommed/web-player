@@ -19,7 +19,6 @@ const AudioController = ({
 }) => {
   const [vol, setVol] = useState(volume);
   const [reproduction, setReproduction] = useState(player?.isPlaying);
-  console.log("audioController", reproduction);
 
   function truncText(text) {
     if (text && text.length > 40) {

@@ -1,14 +1,15 @@
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { connect } from "react-redux";
-import { actionSetAvatar } from "../actions";
+import { actionAboutMe, actionSetAvatar } from "../actions";
 
-const MyDropzone = ({ onload }) => {
+const MyDropzone = ({ onload, aboutMe }) => {
   const onDrop = useCallback(
     (acceptedFiles) => {
       onload(acceptedFiles[0]);
+      aboutMe();
     },
-    [onload]
+    [onload, aboutMe]
   );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -29,4 +30,5 @@ const MyDropzone = ({ onload }) => {
 
 export const CMyDropzone = connect(null, {
   onload: actionSetAvatar,
+  aboutMe: actionAboutMe,
 })(MyDropzone);

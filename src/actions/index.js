@@ -109,11 +109,11 @@ export const actionFindUsers = () =>
     )
   );
 
-export const actionUploadPhoto = (file) => {
+export const actionUploadFile = (file) => {
   let fd = new FormData();
   fd.append("photo", file);
   return actionPromise(
-    "uploadPhoto",
+    "uploadFile",
     fetch(`${backURL}/upload`, {
       method: "POST",
       headers: localStorage.authToken

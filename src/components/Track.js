@@ -22,15 +22,13 @@ const Track = ({
 }) => {
   const [reproduction, setReproduction] = useState(false);
   let track = audio?.url ? `${backURL}/${audio.url}` : undefined;
-  let trackRef = useRef(new Audio(track));
+  let audioTrack = new Audio(track);
 
-  useEffect(() => {
-    if (reproduction) {
-      trackRef.current.play();
-    } else {
-      trackRef.current.pause();
-    }
-  }, [reproduction, playAudio, pauseAudio]);
+  if (reproduction) {
+    audioTrack.play();
+  } else {
+    audioTrack.pause();
+  }
 
   function truncText(text) {
     if (text && text.length > 40) {
@@ -40,14 +38,6 @@ const Track = ({
 
   return (
     <>
-      {reproduction ? (
-        <CAudioController
-          name={audio?.originalFileName}
-          currentTime={trackRef.current.currentTime}
-          duration={player.duration}
-          volume={trackRef.current.volume}
-        />
-      ) : null}
       <div className="d-flex mt-5">
         <div className="customAudio p-2 bg-dark text-white">
           <span className="ml-3 d-inline-block">
@@ -62,7 +52,7 @@ const Track = ({
         <Button
           onClick={() => {
             setReproduction(!reproduction);
-            loadAudio(trackRef.current, trackRef.current.duration);
+            loadAudio(audioTrack, audioTrack.duration);
             reproduction ? pauseAudio(true) : playAudio(true);
           }}
         >
@@ -76,6 +66,12 @@ const Track = ({
           <i className="fas fa-plus"></i>
         </Button>
       </div>
+      <CAudioController
+        name={audio?.originalFileName}
+        currentTime={audioTrack.currentTime}
+        duration={player.duration}
+        volume={player.volume}
+      />
     </>
   );
 };
