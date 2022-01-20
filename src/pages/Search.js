@@ -1,12 +1,36 @@
 import { connect } from "react-redux";
-import { SearchField } from "./../components/SearchField";
+import { CSearchResult } from "../components/SearchResult";
 import { AuthCheck } from "./../components/AuthCheck";
 import { history } from "./../App";
 import { CTrack } from "../components/Track";
 import { PlayerHeader } from "./../components/PlayerHeader";
 import { Loader } from "./../components/Loader";
+import { useState } from "react";
+import { actionSearch } from "./../actions/index";
 
-const Search = ({ auth, promise }) => {
+const SearchField = connect(null, { onChangeSearch: actionSearch })(
+  ({ onChangeSearch }) => {
+    const [text, setText] = useState("");
+    return (
+      <div className="input-group rounded">
+        <input
+          type="search"
+          className="form-control rounded"
+          placeholder="Поиск музыки"
+          aria-label="Поиск"
+          aria-describedby="search-addon"
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            onChangeSearch(text);
+          }}
+        />
+      </div>
+    );
+  }
+);
+
+const Search = ({ search, auth, promise }) => {
   return (
     <div className="SearchPage">
       {auth.token && history.location.pathname === "/search" ? (
@@ -14,7 +38,9 @@ const Search = ({ auth, promise }) => {
           <h1 className="text-center">Поиск по сайту</h1>
           <SearchField />
           {promise?.tracks?.payload?.length !== 0 ? <PlayerHeader /> : null}
-          {promise.tracks.status === "PENDING" ? (
+          {search?.searchResult?.payload?.payload ? (
+            <CSearchResult />
+          ) : promise.tracks.status === "PENDING" ? (
             <Loader />
           ) : promise?.tracks?.payload &&
             promise?.tracks?.payload?.length !== 0 ? (
@@ -40,6 +66,10 @@ const Search = ({ auth, promise }) => {
 };
 
 export const CSearch = connect(
-  (state) => ({ auth: state.auth, promise: state.promise }),
+  (state) => ({
+    search: state.search,
+    auth: state.auth,
+    promise: state.promise,
+  }),
   null
 )(Search);

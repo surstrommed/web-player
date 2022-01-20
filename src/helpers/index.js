@@ -46,6 +46,8 @@ export function validateNickname(nick) {
   return /^[a-z0-9_-]{3,8}$/.test(nick);
 }
 
+export const delay = (ms) => new Promise((ok) => setTimeout(() => ok(ms), ms));
+
 export const useLocalStoredState = (defaultState, localStorageName) => {
   let payload;
   try {

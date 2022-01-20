@@ -69,7 +69,7 @@ const Track = ({
           ></i>
         </Button>
         <Button>
-        <i class="fas fa-download"></i>
+          <i className="fas fa-download"></i>
         </Button>
         <div className="ml-5">
           Загрузил:{" "}
@@ -78,13 +78,6 @@ const Track = ({
           </Link>
         </div>
       </div>
-
-      <CAudioController
-        name={audio?.originalFileName}
-        currentTime={currentTime}
-        duration={duration}
-        volume={volume}
-      />
     </>
   );
 };

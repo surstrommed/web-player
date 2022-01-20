@@ -1,19 +1,23 @@
 import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { connect } from "react-redux";
-import { actionSetAvatar } from "../actions";
+import { actionSetAvatar, actionUploadTracks } from "../actions";
 
-const MyDropzone = ({ onload }) => {
+const MyDropzone = ({ onloadAvatar, onloadMusic }) => {
   const onDrop = useCallback(
     (acceptedFiles) => {
-      onload(acceptedFiles[0]);
+      if (acceptedFiles[0].type.includes("audio")) {
+        onloadMusic(acceptedFiles[0]);
+      } else {
+        onloadAvatar(acceptedFiles[0]);
+      }
     },
-    [onload]
+    [onloadAvatar, onloadMusic]
   );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <div className="mt-2 text-center customBorder" {...getRootProps()}>
+    <div className="mt-2 text-center customBorder mx-auto" {...getRootProps()}>
       <input {...getInputProps()} />
       {isDragActive ? (
         <p>Поместите файлы сюда...</p>
@@ -28,5 +32,6 @@ const MyDropzone = ({ onload }) => {
 };
 
 export const CMyDropzone = connect(null, {
-  onload: actionSetAvatar,
+  onloadAvatar: actionSetAvatar,
+  onloadMusic: actionUploadTracks,
 })(MyDropzone);

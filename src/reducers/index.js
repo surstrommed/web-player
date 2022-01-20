@@ -52,6 +52,13 @@ export const localStoredReducer =
 // track: {_id, url, originalFileName}
 // playlist: {_id, name, tracks: [{_id}, {_id}, ...tracks]}
 
+export const searchReducer = (state={}, {type, ...params}) => {
+  if (type === 'SEARCH_RESULT'){
+      return {searchResult: {...params}}
+  }
+  return state//, в таком случае вызываются все редьюсеры, но далеко не всегда action.type будет относится к этому редьюсеру. Тогда редьюсер должен вернуть state как есть. 
+}
+
 export const playerReducer = (
   state = {},
   {

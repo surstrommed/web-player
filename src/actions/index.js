@@ -95,21 +95,6 @@ export const actionFindUsers = () =>
     )
   );
 
-export const actionUploadFile = (file, type = "photo") => {
-  let fd = new FormData();
-  fd.append(type, file);
-  return actionPromise(
-    "uploadFile",
-    fetch(`${backURL}/upload`, {
-      method: "POST",
-      headers: localStorage.authToken
-        ? { Authorization: "Bearer " + localStorage.authToken }
-        : {},
-      body: fd,
-    }).then((res) => res.json())
-  );
-};
-
 export const actionFindTracks = () =>
   actionPromise(
     "tracks",
@@ -185,6 +170,47 @@ export const actionCreatePlaylist = (name) =>
       { playlist: { name } }
     )
   );
+
+export const actionFindPlaylistTracks = (_id) =>
+  actionPromise(
+    "playlistTracks",
+    gql(
+      `query playlistTracks($q:String) {
+ PlaylistFindOne(query:$q) {
+ _id name tracks {_id url originalFileName} owner {_id login}
+ }
+}`,
+      { q: JSON.stringify([{ _id }]) }
+    )
+  );
+
+export const actionLoadTracksToPlaylist = (idTrack, idPlaylist) =>
+  actionPromise(
+    "loadTracksToPlaylist",
+    gql(
+      `mutation loadTracksToPlaylist($playlist:PlaylistInput) {
+ PlaylistUpsert(playlist:$playlist) {
+ _id name tracks {_id url originalFileName} owner {_id login}
+ }
+}`,
+      { playlist: { _id: idPlaylist, tracks: { _id: idTrack } } }
+    )
+  );
+
+export const actionUploadFile = (file, type = "photo") => {
+  let fd = new FormData();
+  fd.append(type, file);
+  return actionPromise(
+    `${type === "photo" ? "uploadPhoto" : "uploadTrack"}`,
+    fetch(`${backURL}/${type === "photo" ? "upload" : "track"}`, {
+      method: "POST",
+      headers: localStorage.authToken
+        ? { Authorization: "Bearer " + localStorage.authToken }
+        : {},
+      body: fd,
+    }).then((res) => res.json())
+  );
+};
 
 // ================================================
 
@@ -312,6 +338,13 @@ export const actionSetNewPassword = (login, password, newPassword) => ({
 //   await dispatch(actionAboutMe());
 // };
 
+export const actionSearch = (text) => ({ type: "SEARCH", text });
+
+export const actionSearchResult = (payload) => ({
+  type: "SEARCH_RESULT",
+  payload,
+});
+
 export const actionLoadAudio = (track, duration, playlist, playlistIndex) => ({
   type: "LOAD_TRACK",
   track,
@@ -349,4 +382,20 @@ export const actionFindUserPlaylists = () => ({ type: "FIND_PLAYLISTS" });
 export const actionCreateNewPlaylist = (name) => ({
   type: "CREATE_PLAYLIST",
   name,
+});
+
+export const actionPlaylistTracks = (_id) => ({
+  type: "PLAYLIST_TRACKS",
+  _id,
+});
+
+export const actionTracksToPlaylist = (idTrack, idPlaylist) => ({
+  type: "LOAD_TRACKS_PLAYLIST",
+  idTrack,
+  idPlaylist,
+});
+
+export const actionUploadTracks = (file) => ({
+  type: "UPLOAD_TRACKS",
+  file,
 });

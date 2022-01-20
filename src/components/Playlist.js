@@ -7,25 +7,25 @@ import { PlayerHeader } from "./PlayerHeader";
 import { Loader } from "./Loader";
 import { CTrack } from "./Track";
 import { Button } from "react-bootstrap";
+import { backURL } from "./../helpers/index";
 
-// const Track = ({ track: { _id, url, originalFileName } = {} }) => (
-//   <div className="Tracks">
-//     <audio controls src={backURL + "/" + url}></audio>{" "}
-//     <strong>{originalFileName}</strong>
-//   </div>
-// );
+const PlaylistTracks = ({ promise, tracks: { _id, url } = {} }) => (
+  <div>
+    {promise?.uploadTrack?.payload?.length !== 0 ? (
+      <div className="d-block mx-auto mt-2 container w-50">
+        <PlayerHeader personal />
+      </div>
+    ) : null}
+  </div>
+);
 
-// const MyTracks = ({ tracks } = {}) => (
-//   <div>
-//     {(tracks || []).map((track) => (
-//       <Track track={track} />
-//     ))}
-//   </div>
-// );
+// <CTrack audio={} index={1} key={Math.random()} />
 
-// const CMyTracks = connect((state) => ({
-//   tracks: state.promise.trackFindByPlaylist?.payload || [],
-// }))(MyTracks);
+const CPlaylistTracks = connect((state) => ({
+  promise: state.promise,
+  tracks: state.promise.uploadTrack?.payload || [],
+}))(PlaylistTracks);
+
 // {promise?.userTracks?.payload?.length !== 0 ? (
 //   <PlayerHeader personal />
 // ) : null}
@@ -45,6 +45,7 @@ import { Button } from "react-bootstrap";
 const MyPlaylistTracks = ({ promise }) => (
   <>
     <CMyDropzone />
+    <CPlaylistTracks />
   </>
 );
 
@@ -95,7 +96,7 @@ const MyPlaylists = ({ promise, onPlaylistCreate }) => {
       <hr />
       <form>
         <div className="mb-3">
-          <label forHtml="playlistCreate" className="form-label">
+          <label forhtml="playlistCreate" className="form-label">
             Создание нового плейлиста:
           </label>
           <input
@@ -111,7 +112,7 @@ const MyPlaylists = ({ promise, onPlaylistCreate }) => {
         <button
           type="submit"
           className="btn btn-primary"
-          disabled={playlist.length < 2 || playlist.length > 10 ? true : false}
+          disabled={playlist.length > 1 && playlist.length < 11 ? false : true}
           onClick={() => {
             onPlaylistCreate(playlist);
           }}
@@ -122,8 +123,8 @@ const MyPlaylists = ({ promise, onPlaylistCreate }) => {
       <hr />
       <div className="Playlists">
         <ul>
-          {promise?.userPlaylists?.payload.map((playlist) => (
-            <Playlist playlist={playlist} />
+          {(promise?.userPlaylists?.payload || []).map((playlist) => (
+            <Playlist playlist={playlist} key={Math.random()} />
           ))}
         </ul>
       </div>
