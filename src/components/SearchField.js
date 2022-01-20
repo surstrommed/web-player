@@ -8,7 +8,7 @@ export const SearchField = () => {
       <input
         type="search"
         className="form-control rounded"
-        placeholder="Музыка, пользователи..."
+        placeholder="Поиск музыки"
         aria-label="Поиск"
         aria-describedby="search-addon"
       />

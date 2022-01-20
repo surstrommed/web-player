@@ -2,7 +2,6 @@ import { connect } from "react-redux";
 import { SearchField } from "./../components/SearchField";
 import { AuthCheck } from "./../components/AuthCheck";
 import { history } from "./../App";
-import { actionFindTracks, actionFindUser } from "./../actions/index";
 import { CTrack } from "../components/Track";
 import { PlayerHeader } from "./../components/PlayerHeader";
 import { Loader } from "./../components/Loader";

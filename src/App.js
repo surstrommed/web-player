@@ -17,6 +17,7 @@ import createSagaMiddleware from "redux-saga";
 import { all, takeEvery, put, call, select } from "redux-saga/effects";
 import * as actions from "./actions";
 import { gql } from "./helpers";
+
 export const history = createBrowserHistory();
 
 const sagaMiddleware = createSagaMiddleware();
@@ -40,8 +41,7 @@ function* rootSaga() {
     loginWatcher(),
     registerWatcher(),
     findTracksWatcher(),
-    findPlaylistsWatcher(),
-    findUserTrackssWatcher(),
+    findUserTracksWatcher(),
     setAvatarWatcher(),
     setNicknameWatcher(),
     setEmailWatcher(),
@@ -50,6 +50,8 @@ function* rootSaga() {
     audioPauseWatcher(),
     audioVolumeWatcher(),
     audioLoadWatcher(),
+    findPlaylistByOwnerWatcher(),
+    createPlaylistWatcher(),
   ]);
 }
 
@@ -139,46 +141,6 @@ function* registerWorker({ login, password }) {
 
 function* registerWatcher() {
   yield takeEvery("FULL_REGISTER", registerWorker);
-}
-
-function* findTracksWorker() {
-  yield call(promiseWorker, actions.actionFindTracks());
-}
-
-function* findTracksWatcher() {
-  yield takeEvery("FIND_ALL_TRACKS", findTracksWorker);
-}
-
-if (localStorage.authToken && history.location.pathname === "/search") {
-  store.dispatch(actions.actionAllTracks());
-}
-
-function* findUserTracksWorker({ _id }) {
-  yield call(promiseWorker, actions.actionUserTracks(_id));
-}
-
-function* findUserTrackssWatcher() {
-  yield takeEvery("FIND_USER_TRACKS", findUserTracksWorker);
-}
-
-if (localStorage.authToken && history.location.pathname === "/library") {
-  let { auth } = store.getState();
-  if (auth) {
-    // let { id } = auth?.payload?.sub;
-    store.dispatch(actions.actionTracksUser("5fe35e5be926687ee86b0a49"));
-  }
-}
-
-function* findPlaylistsWorker({ _id }) {
-  yield call(promiseWorker, actions.actionUserPlaylists(_id));
-}
-
-function* findPlaylistsWatcher() {
-  yield takeEvery("FIND_PLAYLISTS", findPlaylistsWorker);
-}
-
-if (localStorage.authToken && history.location.pathname === "/") {
-  store.dispatch(actions.actionAllPlaylists());
 }
 
 function* setAvatarWorker({ file }) {
@@ -271,6 +233,67 @@ function* audioVolumeWorker({ volume }) {
 
 function* audioVolumeWatcher() {
   yield takeEvery("VOLUME_TRACK", audioVolumeWorker);
+}
+
+function* findPlaylistByOwnerWorker() {
+  let { auth } = yield select();
+  if (auth) {
+    let { id } = auth?.payload?.sub;
+    yield call(promiseWorker, actions.actionUserPlaylists(id));
+    // yield put(actions.actionFindUserPlaylists());
+    // yield put(actions.actionAboutMe());
+  }
+}
+
+function* findPlaylistByOwnerWatcher() {
+  yield takeEvery("FIND_PLAYLISTS", findPlaylistByOwnerWorker);
+}
+
+function* createPlaylistWorker({ name }) {
+  let { auth } = yield select();
+  if (auth) {
+    // let { id } = auth?.payload?.sub;
+    yield call(promiseWorker, actions.actionCreatePlaylist(name));
+    yield put(actions.actionFindUserPlaylists());
+  }
+}
+
+function* createPlaylistWatcher() {
+  yield takeEvery("CREATE_PLAYLIST", createPlaylistWorker);
+}
+
+function* findTracksWorker() {
+  yield call(promiseWorker, actions.actionFindTracks());
+}
+
+function* findTracksWatcher() {
+  yield takeEvery("FIND_ALL_TRACKS", findTracksWorker);
+}
+
+if (localStorage.authToken && history.location.pathname === "/search") {
+  store.dispatch(actions.actionAllTracks());
+}
+
+function* findUserTracksWorker({ _id }) {
+  yield call(promiseWorker, actions.actionUserTracks(_id));
+}
+
+function* findUserTracksWatcher() {
+  yield takeEvery("FIND_USER_TRACKS", findUserTracksWorker);
+}
+
+if (localStorage.authToken && history.location.pathname === "/library") {
+  console.log("Library");
+  store.dispatch(actions.actionFindUserPlaylists());
+  // store.dispatch(actions.actionAboutMe());
+  // let { auth } = store.getState();
+  // if (auth) {
+  // let { id } = auth?.payload?.sub;
+  // store.dispatch(actions.actionTracksUser("5fe35e5be926687ee86b0a49"));
+  // }
+}
+
+if (localStorage.authToken && history.location.pathname === "/") {
 }
 
 store.subscribe(() => console.log(store.getState()));

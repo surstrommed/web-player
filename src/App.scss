@@ -1,5 +1,6 @@
 @import "~bootstrap/scss/bootstrap";
 $mainColor: #0b5ed7;
+$secondaryColor: #212529;
 
 body {
   background-color: #34393d;
@@ -93,7 +94,7 @@ body {
   justify-content: center;
   align-items: center;
   flex-wrap: nowrap;
-  background-color: #212529;
+  background-color: $secondaryColor;
   width: 100%;
   z-index: 1000;
   height: 15vh;
@@ -285,4 +286,44 @@ body {
   position: absolute;
   top: -9999em;
   left: -9999em;
+}
+
+.Playlists {
+  box-sizing: border-box;
+
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+
+  ul li {
+    cursor: pointer;
+    position: relative;
+    padding: 12px 8px 12px 40px;
+    list-style-type: none;
+    background: #eee;
+    font-size: 18px;
+    transition: 0.2s;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  ul li {
+    background: $secondaryColor;
+    margin: 2vh 0;
+  }
+
+  ul li a {
+    text-decoration: none;
+    color: #ddd;
+  }
+
+  ul li:hover {
+    background: #ddd;
+    a {
+      color: $secondaryColor;
+    }
+  }
 }

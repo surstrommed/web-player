@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { backURL } from "../helpers/index";
 import { useState } from "react";
 import { CAudioController } from "./AudioController";
-
+import { Link } from "react-router-dom";
 import {
   actionPauseAudio,
   actionPlayAudio,
@@ -69,9 +69,16 @@ const Track = ({
           ></i>
         </Button>
         <Button>
-          <i className="fas fa-plus"></i>
+        <i class="fas fa-download"></i>
         </Button>
+        <div className="ml-5">
+          Загрузил:{" "}
+          <Link to={`/profile/${audio?.owner?._id}`}>
+            {audio?.owner?.login}
+          </Link>
+        </div>
       </div>
+
       <CAudioController
         name={audio?.originalFileName}
         currentTime={currentTime}
@@ -81,8 +88,6 @@ const Track = ({
     </>
   );
 };
-
-// <div>{promise?.tracks?.}</div>
 
 export const CTrack = connect(
   (state) => ({ promise: state.promise, player: state.player }),

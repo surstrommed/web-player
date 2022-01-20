@@ -21,8 +21,8 @@ const AudioController = ({
   const [reproduction, setReproduction] = useState(player?.isPlaying);
 
   function truncText(text) {
-    if (text && text.length > 40) {
-      return text.substring(0, 40) + "...";
+    if (text && text.includes(".mp3")) {
+      return text.replace(".mp3", "");
     } else return text;
   }
 

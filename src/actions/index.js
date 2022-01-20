@@ -133,9 +133,9 @@ export const actionFindTracks = () =>
     )
   );
 
-export const actionUserTracks = (_id) => {
+export const actionUserTracks = (_id) =>
   // поиск одного трека по его айди
-  return actionPromise(
+  actionPromise(
     "userTracks",
     gql(
       `
@@ -157,23 +157,34 @@ export const actionUserTracks = (_id) => {
       { q: JSON.stringify([{ _id }]) }
     )
   );
-};
 
-export const actionUserPlaylists = (_id) => {
+export const actionUserPlaylists = (_id) =>
   actionPromise(
     "userPlaylists",
     gql(
       `
-          query getPlaylistByOwnerId($ownerId:String!) {
-              PlaylistFind(query: $ownerId) {
-                  _id, name
+          query getPlaylistByOwnerId($q:String!) {
+              PlaylistFind(query: $q) {
+                _id name owner {login}
               }
           }
       `,
-      { q: "[{}]" }
+      { q: JSON.stringify([{ ___owner: _id }]) }
     )
   );
-};
+
+export const actionCreatePlaylist = (name) =>
+  actionPromise(
+    "createPlaylist",
+    gql(
+      `mutation p($playlist:PlaylistInput) {
+   PlaylistUpsert(playlist:$playlist) {
+   _id 
+   }
+}`,
+      { playlist: { name } }
+    )
+  );
 
 // ================================================
 
@@ -259,20 +270,6 @@ export const actionFullRegister = (login, password) => ({
 //   }
 // };
 
-export const actionAllTracks = () => ({
-  type: "FIND_ALL_TRACKS",
-});
-
-export const actionAllPlaylists = (_id) => ({
-  type: "FIND_PLAYLISTS",
-  _id,
-});
-
-export const actionTracksUser = (_id) => ({
-  type: "FIND_USER_TRACKS",
-  _id,
-});
-
 export const actionSetAvatar = (file) => ({
   type: "SET_AVATAR",
   file,
@@ -336,4 +333,20 @@ export const actionPauseAudio = (isPaused) => ({
 export const actionVolumeAudio = (volume) => ({
   type: "VOLUME_TRACK",
   volume,
+});
+
+export const actionAllTracks = () => ({
+  type: "FIND_ALL_TRACKS",
+});
+
+export const actionTracksUser = (_id) => ({
+  type: "FIND_USER_TRACKS",
+  _id,
+});
+
+export const actionFindUserPlaylists = () => ({ type: "FIND_PLAYLISTS" });
+
+export const actionCreateNewPlaylist = (name) => ({
+  type: "CREATE_PLAYLIST",
+  name,
 });
