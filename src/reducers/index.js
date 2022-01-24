@@ -49,26 +49,34 @@ export const localStoredReducer =
     }
   };
 
-// track: {_id, url, originalFileName}
-// playlist: {_id, name, tracks: [{_id}, {_id}, ...tracks]}
-
-export const searchReducer = (state={}, {type, ...params}) => {
-  if (type === 'SEARCH_RESULT'){
-      return {searchResult: {...params}}
+export const searchReducer = (state = {}, { type, ...params }) => {
+  if (type === "SEARCH_RESULT") {
+    return { searchResult: { ...params } };
   }
-  return state//, в таком случае вызываются все редьюсеры, но далеко не всегда action.type будет относится к этому редьюсеру. Тогда редьюсер должен вернуть state как есть. 
-}
+  return state;
+};
+
+let initState = {
+  isPlaying: false,
+  isPaused: true,
+  duration: 0,
+  track: null, // {_id, url, id3.........}
+  playlist: null, // {_id, name, tracks: [{-id}, {_id} ....]}
+  indexInPlaylist: null,
+  currentTime: 0,
+  volume: 0.5,
+};
 
 export const playerReducer = (
-  state = {},
+  state = initState,
   {
     type,
-    track,
     isPlaying,
     isPaused,
     duration,
+    track,
     playlist,
-    playlistIndex,
+    indexInPlaylist,
     currentTime,
     volume,
   }
@@ -77,9 +85,8 @@ export const playerReducer = (
     return {
       ...state,
       track,
-      duration,
       playlist,
-      playlistIndex,
+      indexInPlaylist,
     };
   }
   if (type === "PLAY_TRACK") {
@@ -96,13 +103,33 @@ export const playerReducer = (
       isPlaying: !isPaused,
     };
   }
-  if (type === "VOLUME_TRACK") {
+  if (type === "PREV_TRACK") {
+    return {
+      ...state,
+      indexInPlaylist,
+      track,
+    };
+  }
+  if (type === "NEXT_TRACK") {
+    return {
+      ...state,
+      indexInPlaylist,
+      track,
+    };
+  }
+  if (type === "SET_VOLUME") {
     return {
       ...state,
       volume,
     };
   }
-  if (type === "TIME_TRACK") {
+  if (type === "SET_DURATION") {
+    return {
+      ...state,
+      duration,
+    };
+  }
+  if (type === "SET_CURRENT_TIME_TRACK") {
     return {
       ...state,
       currentTime,

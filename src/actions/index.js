@@ -63,9 +63,9 @@ export const actionRegister = (login, password) =>
     )
   );
 
-export const actionFindUser = (_id) =>
+export const actionFindUser = (_id, type = "myUser") =>
   actionPromise(
-    "user",
+    `${type}`,
     gql(
       `query findUser($q:String){
         UserFindOne(query:$q){
@@ -118,6 +118,27 @@ export const actionFindTracks = () =>
     )
   );
 
+export const actionFindUserTracks = (_id, type = "myTracks") =>
+  // поиск по айди пользователя его треков
+  actionPromise(
+    `${type}`,
+    gql(
+      `query findTracks($q:String){
+        TrackFind(query: $q) {
+          _id url originalFileName
+          id3 {
+              title, artist
+          }
+          playlists {
+              _id, name
+          }
+      }
+      }
+  `,
+      { q: JSON.stringify([{ ___owner: _id }]) }
+    )
+  );
+
 export const actionUserTracks = (_id) =>
   // поиск одного трека по его айди
   actionPromise(
@@ -150,7 +171,7 @@ export const actionUserPlaylists = (_id) =>
       `
           query getPlaylistByOwnerId($q:String!) {
               PlaylistFind(query: $q) {
-                _id name owner {login}
+                _id name owner {login} tracks {_id url originalFileName}
               }
           }
       `,
@@ -184,7 +205,7 @@ export const actionFindPlaylistTracks = (_id) =>
     )
   );
 
-export const actionLoadTracksToPlaylist = (idTrack, idPlaylist) =>
+export const actionLoadTracksToPlaylist = (idPlaylist, array) =>
   actionPromise(
     "loadTracksToPlaylist",
     gql(
@@ -193,7 +214,7 @@ export const actionLoadTracksToPlaylist = (idTrack, idPlaylist) =>
  _id name tracks {_id url originalFileName} owner {_id login}
  }
 }`,
-      { playlist: { _id: idPlaylist, tracks: { _id: idTrack } } }
+      { playlist: { _id: idPlaylist, tracks: array } }
     )
   );
 
@@ -211,6 +232,19 @@ export const actionUploadFile = (file, type = "photo") => {
     }).then((res) => res.json())
   );
 };
+
+export const actionDeletePlaylist = (idPlaylist) =>
+  actionPromise(
+    "deletePlaylist",
+    gql(
+      `mutation deletePlaylist($playlist:PlaylistInput) {
+ PlaylistUpsert(playlist:$playlist) {
+ _id name tracks
+ }
+}`,
+      { playlist: { _id: idPlaylist } }
+    )
+  );
 
 // ================================================
 
@@ -243,24 +277,15 @@ export const actionPromise = (name, promise) => ({
   name,
   promise,
 });
-// async (dispatch) => {
-//   dispatch(actionPending(name));
-//   try {
-//     let data = await promise;
-//     dispatch(actionResolved(name, data));
-//     return data;
-//   } catch (error) {
-//     dispatch(actionRejected(name, error));
-//   }
-// };
+
+export const actionAboutAnotherUser = (id) => ({
+  type: "ABOUT_ANOTHER_USER",
+  id,
+});
 
 export const actionAboutMe = () => ({
   type: "ABOUT_ME",
 });
-// => async (dispatch, getState) => {
-//   let { id } = getState().auth.payload.sub; //select()
-//   await dispatch(actionFindUser(id));       //call(promiseWatcher, actionFindUser())
-// };
 
 export const actionFullLogin = (login, password) => ({
   type: "FULL_LOGIN",
@@ -268,64 +293,28 @@ export const actionFullLogin = (login, password) => ({
   password,
 });
 
-// async (dispatch) => {
-//   let token = await dispatch(actionLogin(l, p));
-//   if (token) {
-//     await dispatch(actionAuthLogin(token));
-//     await dispatch(actionAboutMe());
-//   }
-// };
-
 export const actionFullRegister = (login, password) => ({
   type: "FULL_REGISTER",
   login,
   password,
 });
-// async (dispatch) => {
-//   let { _id } = await dispatch(actionRegister(l, p));
-//   if (_id) {
-//     let nick = l;
-//     if (nick.includes("@")) {
-//       nick = nick.substring(0, nick.indexOf("@"));
-//       if (nick.length > 8) {
-//         nick = nick.substring(0, 8);
-//       }
-//     }
-//     await dispatch(actionFullLogin(l, p));
-//     await dispatch(actionUserUpdate({ _id, nick }));
-//   }
-// };
 
 export const actionSetAvatar = (file) => ({
   type: "SET_AVATAR",
   file,
 });
-// async (dispatch, getState) => {
-//   let { _id } = await dispatch(actionUploadPhoto(file));
-//   let { id } = getState().auth.payload.sub;
-//   await dispatch(actionUserUpdate({ _id: id, avatar: { _id } }));
-//   await dispatch(actionAboutMe());
-// };
 
 export const actionSetNickname = ({ _id, nick }) => ({
   type: "SET_NICKNAME",
   _id,
   nick,
 });
-// async (dispatch) => {
-//   await dispatch(actionUserUpdate({ _id, nick }));
-//   await dispatch(actionAboutMe());
-// };
 
 export const actionSetEmail = ({ _id, login }) => ({
   type: "SET_EMAIL",
   _id,
   login,
 });
-// async (dispatch) => {
-//   await dispatch(actionUserUpdate({ _id, login }));
-//   await dispatch(actionAboutMe());
-// };
 
 export const actionSetNewPassword = (login, password, newPassword) => ({
   type: "SET_NEW_PASSWORD",
@@ -333,10 +322,6 @@ export const actionSetNewPassword = (login, password, newPassword) => ({
   password,
   newPassword,
 });
-// async (dispatch) => {
-//   await dispatch(actionChangePassword(login, password, newPassword));
-//   await dispatch(actionAboutMe());
-// };
 
 export const actionSearch = (text) => ({ type: "SEARCH", text });
 
@@ -345,27 +330,92 @@ export const actionSearchResult = (payload) => ({
   payload,
 });
 
-export const actionLoadAudio = (track, duration, playlist, playlistIndex) => ({
+export const actionLoadAudio = ({ track, playlist, indexInPlaylist }) => ({
   type: "LOAD_TRACK",
   track,
-  duration,
   playlist,
-  playlistIndex,
+  indexInPlaylist,
 });
 
-export const actionPlayAudio = (isPlaying) => ({
+export const actionFullLoadAudio = (track, playlist, indexInPlaylist) => ({
+  type: "FULL_LOAD_TRACK",
+  track,
+  playlist,
+  indexInPlaylist,
+});
+
+export const actionPlayAudio = ({ isPlaying }) => ({
   type: "PLAY_TRACK",
   isPlaying,
 });
 
-export const actionPauseAudio = (isPaused) => ({
+export const actionFullPlayAudio = (isPlaying) => ({
+  type: "FULL_PLAY_TRACK",
+  isPlaying,
+});
+
+export const actionPauseAudio = ({ isPaused }) => ({
   type: "PAUSE_TRACK",
   isPaused,
 });
 
-export const actionVolumeAudio = (volume) => ({
-  type: "VOLUME_TRACK",
+export const actionFullPauseAudio = (isPaused) => ({
+  type: "FULL_PAUSE_TRACK",
+  isPaused,
+});
+
+export const actionPrevTrack = ({ indexInPlaylist, track }) => ({
+  type: "PREV_TRACK",
+  indexInPlaylist,
+  track,
+});
+
+export const actionFullPrevTrack = (indexInPlaylist, track) => ({
+  type: "FULL_PREV_TRACK",
+  indexInPlaylist,
+  track,
+});
+
+export const actionNextTrack = ({ indexInPlaylist, track }) => ({
+  type: "NEXT_TRACK",
+  indexInPlaylist,
+  track,
+});
+
+export const actionFullNextTrack = (indexInPlaylist, track) => ({
+  type: "FULL_NEXT_TRACK",
+  indexInPlaylist,
+  track,
+});
+
+export const actionSetCurrentTimeTrack = ({ currentTime }) => ({
+  type: "SET_CURRENT_TIME_TRACK",
+  currentTime,
+});
+
+export const actionFullSetCurrentTimeTrack = (currentTime) => ({
+  type: "FULL_SET_CURRENT_TIME_TRACK",
+  currentTime,
+});
+
+export const actionSetVolume = ({ volume }) => ({
+  type: "SET_VOLUME",
   volume,
+});
+
+export const actionFullSetVolume = (volume) => ({
+  type: "FULL_SET_VOLUME",
+  volume,
+});
+
+export const actionSetDuration = ({ duration }) => ({
+  type: "SET_DURATION",
+  duration,
+});
+
+export const actionFullSetDuration = (duration) => ({
+  type: "FULL_SET_DURATION",
+  duration,
 });
 
 export const actionAllTracks = () => ({
@@ -389,10 +439,10 @@ export const actionPlaylistTracks = (_id) => ({
   _id,
 });
 
-export const actionTracksToPlaylist = (idTrack, idPlaylist) => ({
+export const actionTracksToPlaylist = (idPlaylist, array) => ({
   type: "LOAD_TRACKS_PLAYLIST",
-  idTrack,
   idPlaylist,
+  array,
 });
 
 export const actionUploadTracks = (file) => ({

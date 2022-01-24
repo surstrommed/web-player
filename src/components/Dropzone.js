@@ -2,12 +2,25 @@ import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { connect } from "react-redux";
 import { actionSetAvatar, actionUploadTracks } from "../actions";
+import { history } from "./../App";
 
-const MyDropzone = ({ onloadAvatar, onloadMusic }) => {
+const MyDropzone = ({ promise, onloadAvatar, onloadMusic }) => {
+  let idPlaylist = history.location.pathname.substring(
+    history.location.pathname.lastIndexOf("/") + 1
+  );
+  let indexPlaylist;
+  if (promise?.userPlaylists?.payload) {
+    indexPlaylist = promise?.userPlaylists?.payload.findIndex(
+      (playlist) => playlist?._id === idPlaylist
+    );
+  }
+
   const onDrop = useCallback(
     (acceptedFiles) => {
       if (acceptedFiles[0].type.includes("audio")) {
-        onloadMusic(acceptedFiles[0]);
+        for (let i = 0; i < acceptedFiles.length; i++) {
+          onloadMusic(acceptedFiles[i]);
+        }
       } else {
         onloadAvatar(acceptedFiles[0]);
       }
@@ -31,7 +44,7 @@ const MyDropzone = ({ onloadAvatar, onloadMusic }) => {
   );
 };
 
-export const CMyDropzone = connect(null, {
+export const CMyDropzone = connect((state) => ({ promise: state.promise }), {
   onloadAvatar: actionSetAvatar,
   onloadMusic: actionUploadTracks,
 })(MyDropzone);

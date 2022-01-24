@@ -26,7 +26,16 @@ import {
 import * as actions from "./actions";
 import { delay, gql } from "./helpers";
 import { CAudioController } from "./components/AudioController";
-
+import {
+  audioLoadWatcher,
+  audioPlayWatcher,
+  audioPauseWatcher,
+  audioPrevTrackWatcher,
+  audioNextTrackWatcher,
+  audioSetDurationWatcher,
+  audioSetVolumeWatcher,
+  audioSetCurrentTimeWatcher,
+} from "./components/Audio";
 export const history = createBrowserHistory();
 
 const sagaMiddleware = createSagaMiddleware();
@@ -46,6 +55,7 @@ export const store = createStore(
 function* rootSaga() {
   yield all([
     promiseWatcher(),
+    aboutAnotherUserWatcher(),
     aboutMeWatcher(),
     routeWatcher(),
     loginWatcher(),
@@ -59,8 +69,12 @@ function* rootSaga() {
     searchWatcher(),
     audioPlayWatcher(),
     audioPauseWatcher(),
-    audioVolumeWatcher(),
+    audioPrevTrackWatcher(),
+    audioNextTrackWatcher(),
+    audioSetCurrentTimeWatcher(),
+    audioSetVolumeWatcher(),
     audioLoadWatcher(),
+    audioSetDurationWatcher(),
     findPlaylistByOwnerWatcher(),
     createPlaylistWatcher(),
     findPlaylistTracksWatcher(),
@@ -99,6 +113,14 @@ function* aboutMeWorker() {
 
 function* aboutMeWatcher() {
   yield takeEvery("ABOUT_ME", aboutMeWorker);
+}
+
+function* aboutAnotherUserWorker({ id }) {
+  yield call(promiseWorker, actions.actionFindUser(id, "anotherUser"));
+}
+
+function* aboutAnotherUserWatcher() {
+  yield takeEvery("ABOUT_ANOTHER_USER", aboutAnotherUserWorker);
 }
 
 if (localStorage.authToken) {
@@ -158,12 +180,6 @@ function* registerWatcher() {
 }
 
 function* setAvatarWorker({ file }) {
-  // async (dispatch, getState) => {
-  //   let { _id } = await dispatch(actionUploadPhoto(file));
-  //   let { id } = getState().auth.payload.sub;
-  //   await dispatch(actionUserUpdate({ _id: id, avatar: { _id } }));
-  //   await dispatch(actionAboutMe());
-  // };
   let { _id } = yield call(promiseWorker, actions.actionUploadFile(file));
   let { auth } = yield select();
   if (auth) {
@@ -181,8 +197,6 @@ function* setAvatarWatcher() {
 }
 
 function* setNicknameWorker({ _id, nick }) {
-  //   await dispatch(actionUserUpdate({ _id, nick }));
-  //   await dispatch(actionAboutMe());
   yield call(promiseWorker, actions.actionUserUpdate({ _id, nick }));
   yield put(actions.actionAboutMe());
 }
@@ -203,8 +217,6 @@ function* setEmailWatcher() {
 }
 
 function* setNewPasswordWorker({ login, password, newPassword }) {
-  //   await dispatch(actionChangePassword(login, password, newPassword));
-  //   await dispatch(actionAboutMe());
   yield call(
     promiseWorker,
     actions.actionChangePassword(login, password, newPassword)
@@ -238,10 +250,7 @@ export function* searchWorker({ text }) {
     {
       query: JSON.stringify([
         {
-          $or: [
-            { originalFileName: `/${text}/` },
-            { owner: { login: `/${text}/` } },
-          ],
+          $or: [{ originalFileName: `/${text}/` }],
         },
         {
           sort: [{ name: 1 }],
@@ -250,44 +259,10 @@ export function* searchWorker({ text }) {
     }
   );
   yield put(actions.actionSearchResult({ payload }));
-  console.log("search end", text);
 }
 
 function* searchWatcher() {
   yield takeLatest("SEARCH", searchWorker);
-}
-
-function* audioLoadWorker({ track, duration, playlist, playlistIndex }) {
-  yield put(actions.actionLoadAudio(track, duration, playlist, playlistIndex));
-}
-
-function* audioLoadWatcher() {
-  yield takeEvery("LOAD_TRACK", audioLoadWorker);
-}
-
-function* audioPlayWorker({ isPlaying }) {
-  console.log("Play track");
-  yield put(actions.actionPlayAudio(isPlaying));
-}
-
-function* audioPlayWatcher() {
-  yield takeEvery("PLAY_TRACK", audioPlayWorker);
-}
-
-function* audioPauseWorker({ isPaused }) {
-  yield put(actions.actionPauseAudio(isPaused));
-}
-
-function* audioPauseWatcher() {
-  yield takeEvery("PAUSE_TRACK", audioPauseWorker);
-}
-
-function* audioVolumeWorker({ volume }) {
-  yield put(actions.actionVolumeAudio(volume));
-}
-
-function* audioVolumeWatcher() {
-  yield takeEvery("VOLUME_TRACK", audioVolumeWorker);
 }
 
 function* findPlaylistByOwnerWorker() {
@@ -326,6 +301,7 @@ function* findTracksWatcher() {
 }
 
 if (localStorage.authToken && history.location.pathname === "/search") {
+  console.log("Search");
   store.dispatch(actions.actionAllTracks());
 }
 
@@ -345,35 +321,15 @@ function* findPlaylistTracksWatcher() {
   yield takeEvery("PLAYLIST_TRACKS", findPlaylistTracksWorker);
 }
 
-function* loadTracksToPlaylistWorker({ idTrack, idPlaylist }) {
+function* loadTracksToPlaylistWorker({ idPlaylist, array }) {
   yield call(
     promiseWorker,
-    actions.actionLoadTracksToPlaylist(idTrack, idPlaylist)
+    actions.actionLoadTracksToPlaylist(idPlaylist, array)
   );
 }
 
 function* loadTracksToPlaylistWatcher() {
   yield takeEvery("LOAD_TRACKS_PLAYLIST", loadTracksToPlaylistWorker);
-}
-
-export function* uploadTracksToPlaylistWorker({ file }) {
-  let idPlaylist = history.location.pathname.substring(
-    history.location.pathname.lastIndexOf("/")
-  );
-  if (file) {
-    let track = yield call(
-      promiseWorker,
-      actions.actionUploadFile(file, "track")
-    );
-    let idTrack = track?._id;
-    console.log(idTrack, idPlaylist);
-    yield put(actions.actionTracksToPlaylist(idTrack, idPlaylist));
-  }
-  yield put(actions.actionAboutMe());
-}
-
-export function* uploadTracksToPlaylistWatcher() {
-  yield takeEvery("UPLOAD_TRACKS", uploadTracksToPlaylistWorker);
 }
 
 if (
@@ -382,16 +338,60 @@ if (
 ) {
   let { auth } = store.getState();
   if (auth) {
-    let { id } = auth?.payload?.sub;
-    store.dispatch(actions.actionPlaylistTracks(id));
+    let currentPlaylistId = history.location.pathname.substring(
+      history.location.pathname.lastIndexOf("/") + 1
+    );
+    store.dispatch(actions.actionPlaylistTracks(currentPlaylistId));
   }
+}
+
+const uploadedTracks = [];
+
+export function* uploadTracksToPlaylistWorker({ file }) {
+  const currentTracksPlaylist = [];
+  let resultArray = [];
+  let idPlaylist = history.location.pathname.substring(
+    history.location.pathname.lastIndexOf("/") + 1
+  );
+  let { promise } = yield select();
+  if (promise?.playlistTracks?.payload?.tracks) {
+    promise?.playlistTracks?.payload?.tracks.map((playlistTrack) =>
+      currentTracksPlaylist.push(playlistTrack)
+    );
+  }
+  if (file) {
+    let track = yield call(
+      promiseWorker,
+      actions.actionUploadFile(file, "track")
+    );
+    uploadedTracks.push(track);
+    let allUploadTracks = [...currentTracksPlaylist, ...uploadedTracks];
+    allUploadTracks.map((uploadedTrack) =>
+      resultArray.push({ _id: uploadedTrack?._id })
+    );
+    yield put(actions.actionTracksToPlaylist(idPlaylist, resultArray));
+  }
+  yield put(actions.actionAboutMe());
+}
+
+export function* uploadTracksToPlaylistWatcher() {
+  yield takeEvery("UPLOAD_TRACKS", uploadTracksToPlaylistWorker);
 }
 
 if (localStorage.authToken && history.location.pathname === "/library") {
   store.dispatch(actions.actionFindUserPlaylists());
 }
 
-if (localStorage.authToken && history.location.pathname === "/") {
+if (localStorage.authToken && history.location.pathname.includes("/profile")) {
+  let currentUserId = history.location.pathname.substring(
+    history.location.pathname.lastIndexOf("/") + 1
+  );
+  let { auth } = store.getState();
+  if (auth) {
+    currentUserId === auth?.payload?.sub?.id
+      ? store.dispatch(actions.actionAboutMe())
+      : store.dispatch(actions.actionAboutAnotherUser(currentUserId));
+  }
 }
 
 store.subscribe(() => console.log(store.getState()));

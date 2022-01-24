@@ -6,6 +6,9 @@ export const PlayerHeader = ({ personal }) => {
     window.onscroll = () => {
       setOffset(window.pageYOffset);
     };
+    return () => {
+      setOffset(0);
+    };
   }, []);
 
   return (
@@ -13,7 +16,7 @@ export const PlayerHeader = ({ personal }) => {
       <div className="container-fluid player-container">
         <span>#</span>
         <span>Название</span>
-        <span>{personal ? "Плейлист" : "Информация"}</span>
+        <span>{personal ? "" : "Владелец"}</span>
       </div>
     </nav>
   );

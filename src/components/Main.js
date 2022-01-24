@@ -6,7 +6,7 @@ import { Page404 } from "../pages/Page404";
 import { CSearch } from "./../pages/Search";
 import { CLibrary } from "./../pages/Library";
 import { CProfile } from "./../pages/Profile";
-import { CMyPlaylistTracks } from "./Playlist";
+import { MyPlaylistTracks } from "./Playlist";
 
 const Content = ({ children }) => <div className="Content">{children}</div>;
 
@@ -27,10 +27,10 @@ export const Main = () => (
         <Route path="/signup" component={withRouter(CSignUpForm)} />
         <Route path="/search" component={withRouter(CSearch)} />
         <Route path="/library" component={withRouter(CLibrary)} />
-        <Route path="/profile" component={withRouter(CProfile)} />
+        <Route path="/profile/:_id" component={withRouter(CProfile)} />
         <Route
           path="/myplaylist/:_id"
-          component={withRouter(CMyPlaylistTracks)}
+          component={withRouter(MyPlaylistTracks)}
         />
         <Route path="" component={withRouter(Page404)} />
       </Switch>

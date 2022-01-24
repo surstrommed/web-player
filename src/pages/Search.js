@@ -2,7 +2,7 @@ import { connect } from "react-redux";
 import { CSearchResult } from "../components/SearchResult";
 import { AuthCheck } from "./../components/AuthCheck";
 import { history } from "./../App";
-import { CTrack } from "../components/Track";
+import { CTracks } from "../components/Tracks";
 import { PlayerHeader } from "./../components/PlayerHeader";
 import { Loader } from "./../components/Loader";
 import { useState } from "react";
@@ -40,13 +40,10 @@ const Search = ({ search, auth, promise }) => {
           {promise?.tracks?.payload?.length !== 0 ? <PlayerHeader /> : null}
           {search?.searchResult?.payload?.payload ? (
             <CSearchResult />
-          ) : promise.tracks.status === "PENDING" ? (
+          ) : promise?.tracks?.status === "PENDING" ? (
             <Loader />
-          ) : promise?.tracks?.payload &&
-            promise?.tracks?.payload?.length !== 0 ? (
-            promise.tracks.payload.map((track, index) => (
-              <CTrack audio={track} index={index} key={Math.random()} />
-            ))
+          ) : promise?.tracks?.payload?.length !== 0 ? (
+            <CTracks tracks={promise.tracks.payload} />
           ) : (
             <h2 className="mt-5 text-center">
               {promise?.user?.payload?.nick

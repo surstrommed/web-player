@@ -2,17 +2,22 @@ import { actionAuthLogout } from "../actions/index";
 import { NavDropdown } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { history } from "../App";
+import { history, store } from "../App";
 import { backURL } from "../helpers";
 
 const Auth = ({ auth, promise, actionLogOut }) => {
   if (
-    auth.token &&
+    auth?.token &&
     (history.location.pathname === "/login" ||
       history.location.pathname === "/signup")
   ) {
     history.push("/");
   }
+  let id;
+  if (auth?.token) {
+    id = store.getState()?.auth?.payload?.sub?.id;
+  }
+
   return (
     <>
       {auth.payload ? (
@@ -23,25 +28,24 @@ const Auth = ({ auth, promise, actionLogOut }) => {
               <img
                 className="thumbnail-image avatarHeader"
                 src={
-                  promise?.user?.payload?.avatar
-                    ? `${backURL}/${promise.user.payload.avatar.url}`
+                  promise?.myUser?.payload?.avatar
+                    ? `${backURL}/${promise.myUser.payload.avatar.url}`
                     : "https://i.ibb.co/bBxzmTm/default-avatar.jpg"
                 }
                 alt="Avatar"
               />
-              {promise?.user?.payload?.nick}
+              {promise?.myUser?.payload?.nick}
             </div>
           }
           menuVariant="dark"
         >
           <NavDropdown.Item
             componentclass={Link}
-            href="/profile"
-            to={`/profile`}
+            href={`/profile/${id}`}
+            to={`/profile/${id}`}
           >
             Профиль
           </NavDropdown.Item>
-
           <NavDropdown.Divider />
           <NavDropdown.Item as="button" onClick={() => actionLogOut()}>
             Выйти
