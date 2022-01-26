@@ -30,41 +30,33 @@ const SearchField = connect(null, { onChangeSearch: actionSearch })(
   }
 );
 
-const Search = ({ search, auth, promise }) => {
+const Search = ({ search, promise }) => {
   return (
     <div className="SearchPage">
-      {auth.token && history.location.pathname === "/search" ? (
-        <>
-          <div className="d-block mx-auto mt-2 container w-50">
-            <h1 className="text-center">Поиск по сайту</h1>
-            <SearchField />
-            {search?.searchResult?.payload?.payload ? (
-              <CSearchResult />
-            ) : promise?.tracks?.payload?.length !== 0 ? (
-              <>
-                <PlayerHeader />
-                <CPreloader
-                  promiseName={"tracks"}
-                  promiseState={promise}
-                  children={<CTracks tracks={promise?.tracks?.payload} />}
-                />
-              </>
-            ) : (
-              <h2 className="mt-5 text-center">
-                {promise?.myUser?.payload?.nick
-                  ? promise?.myUser?.payload?.nick
-                  : "user"}
-                , по запросу не было найдено треков.
-              </h2>
-            )}
+      <div className="d-block mx-auto mt-2 container w-50">
+        <h1 className="text-center">Поиск по сайту</h1>
+        <SearchField />
+        {search?.searchResult?.payload?.payload ? (
+          <CSearchResult />
+        ) : promise?.tracks?.payload?.length !== 0 ? (
+          <div>
+            <PlayerHeader />
+            <CPreloader
+              promiseName={"tracks"}
+              promiseState={promise}
+              children={<CTracks tracks={promise?.tracks?.payload} />}
+            />
           </div>
-          <div className="container" style={{ height: "300px" }}></div>
-        </>
-      ) : (
-        <div className="d-block mx-auto mt-2 container w-50">
-          <AuthCheck header="Поиск по сайту" />
-        </div>
-      )}
+        ) : (
+          <h2 className="mt-5 text-center">
+            {promise?.myUser?.payload?.nick
+              ? promise?.myUser?.payload?.nick
+              : "user"}
+            , по запросу не было найдено треков.
+          </h2>
+        )}
+      </div>
+      <div className="container" style={{ height: "300px" }}></div>
     </div>
   );
 };
@@ -72,7 +64,6 @@ const Search = ({ search, auth, promise }) => {
 export const CSearch = connect(
   (state) => ({
     search: state.search,
-    auth: state.auth,
     promise: state.promise,
   }),
   null

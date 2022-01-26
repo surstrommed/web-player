@@ -9,8 +9,8 @@ function* audioLoadWorker({ track, playlist, indexInPlaylist }) {
   let { player } = yield select();
   if (player?.indexInPlaylist !== indexInPlaylist) {
     yield put(actionLoadAudio(track, playlist, indexInPlaylist));
+    audio.src = `${backURL}/${player?.track?.url}`;
   }
-  audio.src = `${backURL}/${player?.track?.url}`;
   if (player?.indexInPlaylist === indexInPlaylist) {
     if (player?.isPlaying) {
       yield put(actionFullPauseAudio(true));
@@ -101,7 +101,7 @@ export function* audioSetDurationWatcher() {
   yield takeEvery("FULL_SET_DURATION", audioSetDurationWorker);
 }
 
-export const actionLoadAudio = ({ track, playlist, indexInPlaylist }) => ({
+export const actionLoadAudio = (track, playlist, indexInPlaylist) => ({
   type: "LOAD_TRACK",
   track,
   playlist,

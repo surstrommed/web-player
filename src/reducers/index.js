@@ -82,6 +82,7 @@ export const playerReducer = (
   }
 ) => {
   if (type === "LOAD_TRACK") {
+    console.log(track, playlist, indexInPlaylist);
     return {
       ...state,
       track,

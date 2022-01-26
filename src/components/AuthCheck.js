@@ -1,9 +1,9 @@
 import { Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-export const AuthCheck = ({ header }) => {
+export const AuthCheck = ({ header = "Ошибка доступа" }) => {
   return (
-    <div>
+    <div className="d-block mx-auto mt-5 container w-50">
       <Alert>
         <h2>{header}</h2>
         <p>

@@ -7,6 +7,7 @@ import { CSearch } from "./../pages/Search";
 import { CLibrary } from "./../pages/Library";
 import { CProfile } from "./../pages/Profile";
 import { MyPlaylistTracks } from "./Playlist";
+import { CProtectedRoute, CRRoute } from "./RRoute";
 
 const Content = ({ children }) => <div className="Content">{children}</div>;
 
@@ -22,17 +23,34 @@ export const Main = () => (
   <main className="Main" style={{ height: "150vh" }}>
     <Content>
       <Switch>
-        <Route path="/" component={withRouter(PageMain)} exact />
-        <Route path="/login" component={withRouter(CLoginForm)} />
-        <Route path="/signup" component={withRouter(CSignUpForm)} />
-        <Route path="/search" component={withRouter(CSearch)} />
-        <Route path="/library" component={withRouter(CLibrary)} />
-        <Route path="/profile/:_id" component={withRouter(CProfile)} />
-        <Route
+        <CRRoute path="/" component={withRouter(PageMain)} exact />
+        <CRRoute path="/login" component={withRouter(CLoginForm)} />
+        <CRRoute path="/signup" component={withRouter(CSignUpForm)} />
+        <CProtectedRoute
+          roles={["admin", "user"]}
+          path="/search"
+          fallback="/"
+          component={withRouter(CSearch)}
+        />
+        <CProtectedRoute
+          roles={["user"]}
+          path="/library"
+          fallback="/"
+          component={withRouter(CLibrary)}
+        />
+        <CProtectedRoute
+          roles={["user"]}
+          path="/profile/:_id"
+          fallback="/"
+          component={withRouter(CProfile)}
+        />
+        <CProtectedRoute
+          roles={["user"]}
           path="/myplaylist/:_id"
+          fallback="/"
           component={withRouter(MyPlaylistTracks)}
         />
-        <Route path="" component={withRouter(Page404)} />
+        <CRRoute path="" component={withRouter(Page404)} />
       </Switch>
     </Content>
   </main>
