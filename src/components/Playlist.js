@@ -2,51 +2,90 @@ import { useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { CMyDropzone } from "./Dropzone";
-import { sortableContainer, sortableElement } from "react-sortable-hoc";
-import { actionCreateNewPlaylist } from "./../actions/index";
-import { PlayerHeader } from "./PlayerHeader";
-import { Loader } from "./Loader";
-import { Button } from "react-bootstrap";
+import {
+  actionCreateNewPlaylist,
+  actionTracksToPlaylist,
+} from "./../actions/index";
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
+import { arrayMoveImmutable } from "array-move";
 import { CAudio } from "./Audio";
 import { history } from "./../App";
+import { CPreloader } from "./Preloader";
 
-const PlaylistTracks = ({ promise, tracks: { _id, url } = {} }) => {
+const PlaylistTrackItem = ({ track, index, key, playlist }) => {
+  return (
+    <div className="d-block mx-auto mt-2 container w-50" key={key}>
+      <CAudio track={track} playlist={playlist} personal />
+    </div>
+  );
+};
+
+const SortableItem = SortableElement(PlaylistTrackItem);
+
+const PlaylistTracksList = ({ playlistTracks }) => {
+  return (
+    <div>
+      {(playlistTracks || []).map((track, i) => {
+        return (
+          <SortableItem
+            track={track}
+            index={i}
+            key={track._id}
+            playlist={playlistTracks}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+const SortableList = SortableContainer(PlaylistTracksList);
+
+const TracksInPlaylistSortable = ({ playlistTracks, loadTracksToPlaylist }) => {
   let idPlaylist = history.location.pathname.substring(
     history.location.pathname.lastIndexOf("/") + 1
   );
-  let indexPlaylist;
-  if (promise?.userPlaylists?.payload) {
-    indexPlaylist = promise?.userPlaylists?.payload.findIndex(
-      (playlist) => playlist?._id === idPlaylist
+  const [newPlaylistTracks, setNewPlaylistTracks] = useState(playlistTracks);
+  const onSortEnd = (e) => {
+    var newChangedPlaylistTracks = arrayMoveImmutable(
+      newPlaylistTracks,
+      e.oldIndex,
+      e.newIndex
     );
-  }
+    setNewPlaylistTracks(newChangedPlaylistTracks);
+    const newChangedPlaylistIdTracks = [];
+    newChangedPlaylistTracks.map((newTrack) =>
+      newChangedPlaylistIdTracks.push({ _id: newTrack?._id })
+    );
+    loadTracksToPlaylist(idPlaylist, newChangedPlaylistIdTracks);
+  };
+  return (
+    <SortableList playlistTracks={newPlaylistTracks} onSortEnd={onSortEnd} />
+  );
+};
 
+const CTracksInPlaylistSortable = connect(null, {
+  loadTracksToPlaylist: actionTracksToPlaylist,
+})(TracksInPlaylistSortable);
+
+const PlaylistTracks = ({ promise, tracks: { _id, url } = {} }) => {
   return (
     <div>
-      {promise?.userPlaylists?.payload[indexPlaylist]?.tracks ? (
-        <div className="d-block mx-auto mt-2 container w-50">
-          <PlayerHeader personal />
-        </div>
-      ) : null}
-      {promise?.loadTracksToPlaylist?.status === "PENDING" ||
-      promise?.playlistTracks?.status === "PENDING" ? (
-        <Loader />
-      ) : promise?.playlistTracks?.payload?.tracks ? (
-        promise?.playlistTracks?.payload?.tracks.map((track, index) => (
-          <div
-            className="d-block mx-auto mt-2 container w-50"
-            key={Math.random()}
-          >
-            <CAudio
-              track={track}
-              index={index}
-              playlist={promise?.playlistTracks?.payload?.tracks}
-              personal
-              key={track._id}
-            />
-          </div>
-        ))
-      ) : (
+      <CPreloader
+        promiseName={"playlistTracks"}
+        promiseState={promise}
+        children={
+          <CTracksInPlaylistSortable
+            playlistTracks={promise?.playlistTracks?.payload?.tracks}
+          />
+        }
+      />
+      <CPreloader
+        promiseName={"myUser"}
+        promiseState={promise}
+        children={null}
+      />
+      {promise?.playlistTracks?.payload?.tracks ? null : (
         <h2 className="mt-5 text-center">
           {promise?.myUser?.payload?.nick
             ? promise?.myUser?.payload?.nick
@@ -73,37 +112,10 @@ export const MyPlaylistTracks = () => (
   </>
 );
 
-const PlaylistEditor = ({
-  entity = { array: [] },
-  onSave,
-  onFileDrop,
-  fileStatus,
-}) => {
-  const [state, setState] = useState(entity);
-  //по файлу в дропзоне:
-  //дергать onFileDrop
-  //fileStatus - информация о заливке файла из redux
-  //через useEffect дождаться когда файл зальется
-  //и сделать setState({...state, array: [...state.array, {объект файла с бэка с _id и url}]})
-  //по react-sortable-hoc
-  //делаете как в пример arrayMove для state.array
-  //по кнопке сохранения делаем onSave(state)
-  //где-то рядом остальные поля из state типа title name text
-  //но это вы уже знаете
-  // return (
-
-  // )
-};
-
 const Playlist = ({ playlist: { _id, name } = {} }) => (
   <li className="d-flex">
     <div className="col-lg-6">
       <Link to={`/myplaylist/${_id}`}>{name}</Link>
-    </div>
-    <div className="col-lg-6">
-      <Button className="ml-5">
-        <i className="fas fa-trash-alt"></i>
-      </Button>
     </div>
   </li>
 );

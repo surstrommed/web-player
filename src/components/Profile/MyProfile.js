@@ -36,7 +36,6 @@ const MyProfile = ({
     <div className="ProfilePage">
       {auth.token ? (
         <>
-          
           {id === auth?.payload?.sub?.id ? (
             promise?.myUser?.status === "RESOLVED" ? (
               <CUserInfo id={id} />

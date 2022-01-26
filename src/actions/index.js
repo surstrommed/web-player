@@ -95,7 +95,7 @@ export const actionFindUsers = () =>
     )
   );
 
-export const actionFindTracks = () =>
+export const actionFindTracks = (skip) =>
   actionPromise(
     "tracks",
     gql(
@@ -114,7 +114,17 @@ export const actionFindTracks = () =>
       }
       }
   `,
-      { q: "[{}]" }
+      {
+        // { q: "[{}]" }
+        q: JSON.stringify([
+          {},
+          {
+            sort: [{ _id: -1 }],
+            skip: [skip || 0],
+            limit: [30],
+          },
+        ]),
+      }
     )
   );
 
@@ -233,19 +243,6 @@ export const actionUploadFile = (file, type = "photo") => {
   );
 };
 
-export const actionDeletePlaylist = (idPlaylist) =>
-  actionPromise(
-    "deletePlaylist",
-    gql(
-      `mutation deletePlaylist($playlist:PlaylistInput) {
- PlaylistUpsert(playlist:$playlist) {
- _id name tracks
- }
-}`,
-      { playlist: { _id: idPlaylist } }
-    )
-  );
-
 // ================================================
 
 export const actionPending = (name) => ({
@@ -330,96 +327,37 @@ export const actionSearchResult = (payload) => ({
   payload,
 });
 
-export const actionLoadAudio = ({ track, playlist, indexInPlaylist }) => ({
-  type: "LOAD_TRACK",
-  track,
-  playlist,
-  indexInPlaylist,
+export const actionLoadNewTracks = (newTracks) => ({
+  type: "ADD_TRACKS",
+  newTracks,
 });
 
-export const actionFullLoadAudio = (track, playlist, indexInPlaylist) => ({
-  type: "FULL_LOAD_TRACK",
-  track,
-  playlist,
-  indexInPlaylist,
+export const actionFullLoadNewTracks = (newTracks) => ({
+  type: "FULL_ADD_TRACKS",
+  newTracks,
 });
 
-export const actionPlayAudio = ({ isPlaying }) => ({
-  type: "PLAY_TRACK",
-  isPlaying,
+export const actionSkipTracks = (skipTracks) => ({
+  type: "ADD_SKIP",
+  skipTracks,
 });
 
-export const actionFullPlayAudio = (isPlaying) => ({
-  type: "FULL_PLAY_TRACK",
-  isPlaying,
+export const actionFullSkipTracks = (skipTracks) => ({
+  type: "FULL_ADD_SKIP",
+  skipTracks,
 });
 
-export const actionPauseAudio = ({ isPaused }) => ({
-  type: "PAUSE_TRACK",
-  isPaused,
+export const actionClearTracks = () => ({
+  type: "CLEAR_SKIP",
 });
 
-export const actionFullPauseAudio = (isPaused) => ({
-  type: "FULL_PAUSE_TRACK",
-  isPaused,
+export const actionFullClearTracks = () => ({
+  type: "FULL_CLEAR_SKIP",
 });
 
-export const actionPrevTrack = ({ indexInPlaylist, track }) => ({
-  type: "PREV_TRACK",
-  indexInPlaylist,
-  track,
-});
-
-export const actionFullPrevTrack = (indexInPlaylist, track) => ({
-  type: "FULL_PREV_TRACK",
-  indexInPlaylist,
-  track,
-});
-
-export const actionNextTrack = ({ indexInPlaylist, track }) => ({
-  type: "NEXT_TRACK",
-  indexInPlaylist,
-  track,
-});
-
-export const actionFullNextTrack = (indexInPlaylist, track) => ({
-  type: "FULL_NEXT_TRACK",
-  indexInPlaylist,
-  track,
-});
-
-export const actionSetCurrentTimeTrack = ({ currentTime }) => ({
-  type: "SET_CURRENT_TIME_TRACK",
-  currentTime,
-});
-
-export const actionFullSetCurrentTimeTrack = (currentTime) => ({
-  type: "FULL_SET_CURRENT_TIME_TRACK",
-  currentTime,
-});
-
-export const actionSetVolume = ({ volume }) => ({
-  type: "SET_VOLUME",
-  volume,
-});
-
-export const actionFullSetVolume = (volume) => ({
-  type: "FULL_SET_VOLUME",
-  volume,
-});
-
-export const actionSetDuration = ({ duration }) => ({
-  type: "SET_DURATION",
-  duration,
-});
-
-export const actionFullSetDuration = (duration) => ({
-  type: "FULL_SET_DURATION",
-  duration,
-});
-
-export const actionAllTracks = () => ({
+export const actionAllTracks = (skip) => ({
   type: "FIND_ALL_TRACKS",
+  skip,
 });
 
 export const actionTracksUser = (_id) => ({

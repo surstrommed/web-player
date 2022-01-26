@@ -60,8 +60,8 @@ let initState = {
   isPlaying: false,
   isPaused: true,
   duration: 0,
-  track: null, // {_id, url, id3.........}
-  playlist: null, // {_id, name, tracks: [{-id}, {_id} ....]}
+  track: null,
+  playlist: null,
   indexInPlaylist: null,
   currentTime: 0,
   volume: 0.5,
@@ -144,3 +144,34 @@ export function routeReducer(state = {}, { type, match }) {
   }
   return state;
 }
+
+export function scrollTracksReducer(
+  state = {},
+  { type, newTracks, skipTracks }
+) {
+  if (type === "ADD_TRACKS") {
+    return {
+      ...state,
+      loadedTracks: [...newTracks],
+    };
+  }
+  if (type === "ADD_SKIP") {
+    return {
+      ...state,
+      skipTracks: state?.skipTracks
+        ? state?.skipTracks + skipTracks
+        : skipTracks,
+    };
+  }
+  if (type === "CLEAR_SKIP") {
+    return {
+      ...state,
+      skipTracks: 0,
+    };
+  }
+  return state;
+}
+
+// loadedTracks:state?.loadedTracks
+//         ? [...state.loadedTracks, ...newTracks]
+//         : [...newTracks],

@@ -1,43 +1,21 @@
 import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
 import { useState } from "react";
-import * as actions from "../actions";
-import { backURL } from "../helpers";
-
-let audio = new Audio();
+import * as actions from "./AudioHandler";
 
 const AudioController = ({
-  promise,
   player,
   playAudio,
   pauseAudio,
   prevAudio,
   nextAudio,
-  setDuration,
   setVolume,
   setCurrentTime,
+  loadAudio,
 }) => {
-  const [vol, setVol] = useState(player?.volume ? +player?.volume : 50);
-  const [dur, setDur] = useState(player?.duration ? player?.duration : 0);
-  const [pos, setPos] = useState(player?.currentTime ? player?.currentTime : 0);
   const [indexInPlaylist, setIndexInPlaylist] = useState(
     player?.indexInPlaylist
   );
-
-  let audioInPlaylist = player?.playlist[player?.indexInPlaylist];
-  audio.src = `${backURL}/${audioInPlaylist?.url}`;
-
-  audio.onloadedmetadata = () => {
-    setDur(audio.duration);
-  };
-
-  audio.ondurationchange = () => {
-    // setDuration(dur);
-  };
-
-  audio.ontimeupdate = (event) => {
-    // console.log(audio.currentTime);
-  };
 
   const checkIndexInPlaylist = (type) => {
     if (type === "prev") {
@@ -60,19 +38,6 @@ const AudioController = ({
     }
   };
 
-  const checkTrackInPlaylist = () => {};
-
-  const audioPlayPause = () => {
-    if (player?.isPlaying) {
-      // audio.pause();
-      pauseAudio(true);
-    }
-    if (player?.isPaused) {
-      // audio.play();
-      playAudio(true);
-    }
-  };
-
   function truncText(text) {
     if (text && text.includes(".mp3")) {
       return text.replace(".mp3", "");
@@ -91,7 +56,7 @@ const AudioController = ({
   return (
     <div className="AudioController">
       <span className="SongName">
-        {truncText(player?.track?.originalFileName)}
+        {player?.track ? truncText(player?.track?.originalFileName) : ""}
       </span>
       <div className="Buttons m-2">
         <Button
@@ -104,7 +69,12 @@ const AudioController = ({
         >
           <i className="fas fa-step-backward"></i>
         </Button>
-        <Button className="mr-2" onClick={() => audioPlayPause()}>
+        <Button
+          className="mr-2"
+          onClick={() =>
+            loadAudio(player?.track, player?.playlist, player?.indexInPlaylist)
+          }
+        >
           <i
             className={`fas fa-${player?.isPlaying ? "pause" : "caret-right"}`}
           ></i>
@@ -127,16 +97,15 @@ const AudioController = ({
             max={
               !player?.duration || Number.isNaN(player?.duration)
                 ? 0
-                : Math.trunc(player?.duration)
+                : player?.duration
             }
-            value={pos}
+            value={player?.currentTime}
             step={1}
             onChange={(e) => {
-              setPos(e.target.value);
-              setCurrentTime(+pos);
+              setCurrentTime(+e.target.value);
             }}
           />
-          <span>{convertTime(dur)}</span>
+          <span>{convertTime(player?.duration)}</span>
         </div>
       </div>
       <div className="Volume m-2">
@@ -144,14 +113,23 @@ const AudioController = ({
           type="range"
           className="form-range"
           min={0}
-          step={1}
           max={100}
-          value={vol}
+          value={player?.volume * 100}
           onChange={(e) => {
-            setVol(e.target.value);
-            setVolume(+vol);
+            let volume = e.target.value / 100;
+            setVolume(volume);
           }}
         />
+        <span
+          style={{
+            fontSize: "14px",
+            position: "absolute",
+            marginTop: "0.5vh",
+            marginLeft: "2vh",
+          }}
+        >
+          {Math.trunc(player?.volume * 100)}%
+        </span>
       </div>
     </div>
   );
@@ -160,12 +138,12 @@ const AudioController = ({
 export const CAudioController = connect(
   (state) => ({ promise: state.promise, player: state.player }),
   {
+    loadAudio: actions.actionFullLoadAudio,
     playAudio: actions.actionFullPlayAudio,
     pauseAudio: actions.actionFullPauseAudio,
     nextAudio: actions.actionFullNextTrack,
     prevAudio: actions.actionFullPrevTrack,
     setVolume: actions.actionFullSetVolume,
-    setDuration: actions.actionFullSetDuration,
     setCurrentTime: actions.actionFullSetCurrentTimeTrack,
   }
 )(AudioController);

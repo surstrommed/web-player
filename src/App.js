@@ -11,6 +11,7 @@ import {
   searchReducer,
   playerReducer,
   routeReducer,
+  scrollTracksReducer,
 } from "./reducers/index";
 import { Sidebar } from "./components/Sidebar";
 import "./App.scss";
@@ -35,7 +36,7 @@ import {
   audioSetDurationWatcher,
   audioSetVolumeWatcher,
   audioSetCurrentTimeWatcher,
-} from "./components/Audio";
+} from "./components/AudioHandler";
 export const history = createBrowserHistory();
 
 const sagaMiddleware = createSagaMiddleware();
@@ -46,6 +47,7 @@ export const store = createStore(
     auth: localStoredReducer(authReducer, "auth"),
     player: localStoredReducer(playerReducer, "player"),
     route: localStoredReducer(routeReducer, "route"),
+    loadedTracks: localStoredReducer(scrollTracksReducer, "loadedTracks"),
     search: searchReducer,
     // изменить условия на страницах на отображения по роутам
   }),
@@ -67,19 +69,22 @@ function* rootSaga() {
     setEmailWatcher(),
     setNewPasswordWatcher(),
     searchWatcher(),
+    audioLoadWatcher(),
+    audioSetDurationWatcher(),
     audioPlayWatcher(),
     audioPauseWatcher(),
     audioPrevTrackWatcher(),
     audioNextTrackWatcher(),
     audioSetCurrentTimeWatcher(),
     audioSetVolumeWatcher(),
-    audioLoadWatcher(),
-    audioSetDurationWatcher(),
     findPlaylistByOwnerWatcher(),
     createPlaylistWatcher(),
     findPlaylistTracksWatcher(),
     loadTracksToPlaylistWatcher(),
     uploadTracksToPlaylistWatcher(),
+    loadNewTracksWatcher(),
+    addSkipTracksWatcher(),
+    clearSkipTracksWatcher(),
   ]);
 }
 
@@ -102,8 +107,6 @@ function* promiseWatcher() {
 }
 
 function* aboutMeWorker() {
-  // let { id } = getState().auth.payload.sub;
-  // await dispatch(actionFindUser(id));
   let { auth } = yield select();
   if (auth) {
     let { id } = auth?.payload?.sub;
@@ -124,6 +127,9 @@ function* aboutAnotherUserWatcher() {
 }
 
 if (localStorage.authToken) {
+  store.dispatch(actions.actionFindUserPlaylists());
+  store.dispatch(actions.actionFullClearTracks());
+  store.dispatch(actions.actionAllTracks());
   store.dispatch(actions.actionAboutMe());
 }
 
@@ -154,6 +160,41 @@ function* loginWorker({ login, password }) {
 
 function* loginWatcher() {
   yield takeEvery("FULL_LOGIN", loginWorker);
+}
+
+function* loadNewTracksWorker({ newTracks }) {
+  yield put(actions.actionLoadNewTracks(newTracks));
+}
+
+function* loadNewTracksWatcher() {
+  yield takeEvery("FULL_ADD_TRACKS", loadNewTracksWorker);
+}
+
+function* addSkipTracksWorker({ skipTracks }) {
+  yield put(actions.actionSkipTracks(skipTracks));
+}
+
+function* addSkipTracksWatcher() {
+  yield takeEvery("FULL_ADD_SKIP", addSkipTracksWorker);
+}
+
+function* clearSkipTracksWorker() {
+  yield put(actions.actionClearTracks());
+}
+
+function* clearSkipTracksWatcher() {
+  yield takeEvery("FULL_CLEAR_SKIP", clearSkipTracksWorker);
+}
+
+function* findTracksWorker({ skip }) {
+  let newTracks = yield call(promiseWorker, actions.actionFindTracks(skip));
+  if (newTracks) {
+    yield put(actions.actionFullLoadNewTracks(newTracks));
+  }
+}
+
+function* findTracksWatcher() {
+  yield takeEvery("FIND_ALL_TRACKS", findTracksWorker);
 }
 
 function* registerWorker({ login, password }) {
@@ -206,8 +247,6 @@ function* setNicknameWatcher() {
 }
 
 function* setEmailWorker({ _id, login }) {
-  //   await dispatch(actionUserUpdate({ _id, nick }));
-  //   await dispatch(actionAboutMe());
   yield call(promiseWorker, actions.actionUserUpdate({ _id, login }));
   yield put(actions.actionAboutMe());
 }
@@ -270,8 +309,6 @@ function* findPlaylistByOwnerWorker() {
   if (auth) {
     let { id } = auth?.payload?.sub;
     yield call(promiseWorker, actions.actionUserPlaylists(id));
-    // yield put(actions.actionFindUserPlaylists());
-    // yield put(actions.actionAboutMe());
   }
 }
 
@@ -282,7 +319,6 @@ function* findPlaylistByOwnerWatcher() {
 function* createPlaylistWorker({ name }) {
   let { auth } = yield select();
   if (auth) {
-    // let { id } = auth?.payload?.sub;
     yield call(promiseWorker, actions.actionCreatePlaylist(name));
     yield put(actions.actionFindUserPlaylists());
   }
@@ -290,19 +326,6 @@ function* createPlaylistWorker({ name }) {
 
 function* createPlaylistWatcher() {
   yield takeEvery("CREATE_PLAYLIST", createPlaylistWorker);
-}
-
-function* findTracksWorker() {
-  yield call(promiseWorker, actions.actionFindTracks());
-}
-
-function* findTracksWatcher() {
-  yield takeEvery("FIND_ALL_TRACKS", findTracksWorker);
-}
-
-if (localStorage.authToken && history.location.pathname === "/search") {
-  console.log("Search");
-  store.dispatch(actions.actionAllTracks());
 }
 
 function* findUserTracksWorker({ _id }) {
@@ -378,10 +401,6 @@ export function* uploadTracksToPlaylistWatcher() {
   yield takeEvery("UPLOAD_TRACKS", uploadTracksToPlaylistWorker);
 }
 
-if (localStorage.authToken && history.location.pathname === "/library") {
-  store.dispatch(actions.actionFindUserPlaylists());
-}
-
 if (localStorage.authToken && history.location.pathname.includes("/profile")) {
   let currentUserId = history.location.pathname.substring(
     history.location.pathname.lastIndexOf("/") + 1
@@ -404,12 +423,14 @@ function App() {
           <Header />
           <Sidebar />
           <Main />
-          <CAudioController
-            name="name"
-            currentTime="currentTime"
-            duration="duration"
-            volume="volume"
-          />
+          {localStorage.authToken ? (
+            <CAudioController
+              name="name"
+              currentTime="currentTime"
+              duration="duration"
+              volume="volume"
+            />
+          ) : null}
         </div>
       </Provider>
     </Router>

@@ -3,13 +3,14 @@ import { AuthCheck } from "./../components/AuthCheck";
 import { history } from "./../App";
 import { CMyPlaylists } from "../components/Playlist";
 
-const Library = ({ auth, promise, actionTracks, actionUser }) => {
+const Library = ({ auth, promise }) => {
   return (
     <div className="SearchPage">
       {auth.token && history.location.pathname === "/library" ? (
         <div className="d-block mx-auto mt-2 container w-50">
           <h1 className="mb-3 text-center">
-            Ваша библиотека плейлистов с музыкой, {promise?.user?.payload?.nick}
+            Ваша библиотека плейлистов с музыкой,{" "}
+            {promise?.myUser?.payload?.nick}
           </h1>
           <CMyPlaylists />
         </div>

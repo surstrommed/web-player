@@ -4,9 +4,9 @@ import { AuthCheck } from "./../components/AuthCheck";
 import { history } from "./../App";
 import { CTracks } from "../components/Tracks";
 import { PlayerHeader } from "./../components/PlayerHeader";
-import { Loader } from "./../components/Loader";
 import { useState } from "react";
 import { actionSearch } from "./../actions/index";
+import { CPreloader } from "./../components/Preloader";
 
 const SearchField = connect(null, { onChangeSearch: actionSearch })(
   ({ onChangeSearch }) => {
@@ -34,25 +34,32 @@ const Search = ({ search, auth, promise }) => {
   return (
     <div className="SearchPage">
       {auth.token && history.location.pathname === "/search" ? (
-        <div className="d-block mx-auto mt-2 container w-50">
-          <h1 className="text-center">Поиск по сайту</h1>
-          <SearchField />
-          {promise?.tracks?.payload?.length !== 0 ? <PlayerHeader /> : null}
-          {search?.searchResult?.payload?.payload ? (
-            <CSearchResult />
-          ) : promise?.tracks?.status === "PENDING" ? (
-            <Loader />
-          ) : promise?.tracks?.payload?.length !== 0 ? (
-            <CTracks tracks={promise.tracks.payload} />
-          ) : (
-            <h2 className="mt-5 text-center">
-              {promise?.user?.payload?.nick
-                ? promise?.user?.payload?.nick
-                : "user"}
-              , на сайте не обнаружено треков.
-            </h2>
-          )}
-        </div>
+        <>
+          <div className="d-block mx-auto mt-2 container w-50">
+            <h1 className="text-center">Поиск по сайту</h1>
+            <SearchField />
+            {search?.searchResult?.payload?.payload ? (
+              <CSearchResult />
+            ) : promise?.tracks?.payload?.length !== 0 ? (
+              <>
+                <PlayerHeader />
+                <CPreloader
+                  promiseName={"tracks"}
+                  promiseState={promise}
+                  children={<CTracks tracks={promise?.tracks?.payload} />}
+                />
+              </>
+            ) : (
+              <h2 className="mt-5 text-center">
+                {promise?.myUser?.payload?.nick
+                  ? promise?.myUser?.payload?.nick
+                  : "user"}
+                , по запросу не было найдено треков.
+              </h2>
+            )}
+          </div>
+          <div className="container" style={{ height: "300px" }}></div>
+        </>
       ) : (
         <div className="d-block mx-auto mt-2 container w-50">
           <AuthCheck header="Поиск по сайту" />

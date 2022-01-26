@@ -13,13 +13,13 @@ const Content = ({ children }) => <div className="Content">{children}</div>;
 const PageMain = () => {
   return (
     <div className="MainContent">
-      <h1>Главная страница</h1>
+      <h1 className="text-center">Главная страница</h1>
     </div>
   );
 };
 
 export const Main = () => (
-  <main className="Main">
+  <main className="Main" style={{ height: "150vh" }}>
     <Content>
       <Switch>
         <Route path="/" component={withRouter(PageMain)} exact />
