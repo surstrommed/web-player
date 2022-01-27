@@ -36,6 +36,7 @@ import {
   audioSetDurationWatcher,
   audioSetVolumeWatcher,
   audioSetCurrentTimeWatcher,
+  audioSetSeekTimeTrackWatcher,
 } from "./components/AudioHandler";
 export const history = createBrowserHistory();
 
@@ -49,7 +50,6 @@ export const store = createStore(
     route: localStoredReducer(routeReducer, "route"),
     loadedTracks: localStoredReducer(scrollTracksReducer, "loadedTracks"),
     search: searchReducer,
-    // изменить условия на страницах на отображения по роутам
   }),
   applyMiddleware(sagaMiddleware)
 );
@@ -76,6 +76,7 @@ function* rootSaga() {
     audioPrevTrackWatcher(),
     audioNextTrackWatcher(),
     audioSetCurrentTimeWatcher(),
+    audioSetSeekTimeTrackWatcher(),
     audioSetVolumeWatcher(),
     findPlaylistByOwnerWatcher(),
     createPlaylistWatcher(),
@@ -156,6 +157,7 @@ function* loginWorker({ login, password }) {
     yield put(actions.actionAuthLogin(token));
     yield put(actions.actionAboutMe());
   }
+  window.location.reload();
 }
 
 function* loginWatcher() {
@@ -338,6 +340,7 @@ function* findUserTracksWatcher() {
 
 function* findPlaylistTracksWorker({ _id }) {
   yield call(promiseWorker, actions.actionFindPlaylistTracks(_id));
+  window.location.reload();
 }
 
 function* findPlaylistTracksWatcher() {

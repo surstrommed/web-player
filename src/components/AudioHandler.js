@@ -9,9 +9,9 @@ function* audioLoadWorker({ track, playlist, indexInPlaylist }) {
   let { player } = yield select();
   if (player?.indexInPlaylist !== indexInPlaylist) {
     yield put(actionLoadAudio(track, playlist, indexInPlaylist));
-    audio.src = `${backURL}/${player?.track?.url}`;
-  }
-  if (player?.indexInPlaylist === indexInPlaylist) {
+    audio.src = `${backURL}/${track?.url}`;
+    yield put(actionFullPlayAudio(true));
+  } else {
     if (player?.isPlaying) {
       yield put(actionFullPauseAudio(true));
     }
@@ -19,13 +19,8 @@ function* audioLoadWorker({ track, playlist, indexInPlaylist }) {
       yield put(actionFullPlayAudio(true));
     }
   }
-  audio.onloadedmetadata = (e) => {
+  audio.onloadedmetadata = () => {
     store.dispatch(actionFullSetDuration(Math.trunc(audio.duration)));
-  };
-  audio.ontimeupdate = (e) => {
-    store.dispatch(
-      actionFullSetCurrentTimeTrack(Math.trunc(e.timeStamp / 1000))
-    );
   };
 }
 
@@ -36,6 +31,10 @@ export function* audioLoadWatcher() {
 function* audioPlayWorker(isPlaying) {
   console.log("Play track");
   audio.play();
+  audio.ontimeupdate = (e) => {
+    console.log(e);
+    store.dispatch(actionFullSetCurrentTimeTrack(e.path[0].currentTime));
+  };
   yield put(actionPlayAudio(isPlaying));
 }
 
@@ -73,12 +72,21 @@ export function* audioNextTrackWatcher() {
 
 function* audioSetCurrentTimeWorker({ currentTime }) {
   console.log("Set current time track");
-  // audio.currentTime = currentTime;
   yield put(actionSetCurrentTimeTrack(currentTime));
 }
 
 export function* audioSetCurrentTimeWatcher() {
   yield takeEvery("FULL_SET_CURRENT_TIME_TRACK", audioSetCurrentTimeWorker);
+}
+
+function* audioSetSeekTimeTrackWorker({ seekTime }) {
+  console.log("Set seek time track");
+  audio.currentTime = seekTime;
+  yield put(actionSetSeekTimeTrack(seekTime));
+}
+
+export function* audioSetSeekTimeTrackWatcher() {
+  yield takeEvery("FULL_SET_SEEK_TIME_TRACK", audioSetSeekTimeTrackWorker);
 }
 
 function* audioSetVolumeWorker({ volume }) {
@@ -93,7 +101,6 @@ export function* audioSetVolumeWatcher() {
 
 function* audioSetDurationWorker({ duration }) {
   console.log("Set duration");
-  // audio.duration = duration;
   yield put(actionSetDuration(duration));
 }
 
@@ -159,7 +166,7 @@ export const actionFullNextTrack = (indexInPlaylist, track) => ({
   track,
 });
 
-export const actionSetCurrentTimeTrack = ({ currentTime }) => ({
+export const actionSetCurrentTimeTrack = (currentTime) => ({
   type: "SET_CURRENT_TIME_TRACK",
   currentTime,
 });
@@ -169,7 +176,17 @@ export const actionFullSetCurrentTimeTrack = (currentTime) => ({
   currentTime,
 });
 
-export const actionSetVolume = ({ volume }) => ({
+export const actionSetSeekTimeTrack = (seekTime) => ({
+  type: "SET_SEEK_TIME_TRACK",
+  currentTime: seekTime,
+});
+
+export const actionFullSetSeekTimeTrack = (seekTime) => ({
+  type: "FULL_SET_SEEK_TIME_TRACK",
+  seekTime,
+});
+
+export const actionSetVolume = (volume) => ({
   type: "SET_VOLUME",
   volume,
 });
@@ -179,7 +196,7 @@ export const actionFullSetVolume = (volume) => ({
   volume,
 });
 
-export const actionSetDuration = ({ duration }) => ({
+export const actionSetDuration = (duration) => ({
   type: "SET_DURATION",
   duration,
 });

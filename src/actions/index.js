@@ -327,6 +327,8 @@ export const actionSearchResult = (payload) => ({
   payload,
 });
 
+export const actionSetSearch = (action) => ({ type: "SET_SEARCH", action });
+
 export const actionLoadNewTracks = (newTracks) => ({
   type: "ADD_TRACKS",
   newTracks,

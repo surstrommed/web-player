@@ -10,7 +10,7 @@ const AudioController = ({
   prevAudio,
   nextAudio,
   setVolume,
-  setCurrentTime,
+  setSeekTime,
   loadAudio,
 }) => {
   const [indexInPlaylist, setIndexInPlaylist] = useState(
@@ -61,6 +61,7 @@ const AudioController = ({
       <div className="Buttons m-2">
         <Button
           className="mr-2"
+          disabled={player?.track ? false : true}
           onClick={() => {
             checkIndexInPlaylist("prev");
             console.log(indexInPlaylist, player?.playlist[indexInPlaylist]);
@@ -70,6 +71,7 @@ const AudioController = ({
           <i className="fas fa-step-backward"></i>
         </Button>
         <Button
+          disabled={player?.track ? false : true}
           className="mr-2"
           onClick={() =>
             loadAudio(player?.track, player?.playlist, player?.indexInPlaylist)
@@ -80,6 +82,7 @@ const AudioController = ({
           ></i>
         </Button>
         <Button
+          disabled={player?.track ? false : true}
           onClick={() => {
             checkIndexInPlaylist("next");
             console.log(indexInPlaylist, player?.playlist[indexInPlaylist]);
@@ -91,6 +94,7 @@ const AudioController = ({
         <div className="Duration">
           <span>{convertTime(player?.currentTime)}</span>
           <input
+            disabled={player?.track ? false : true}
             type="range"
             className="form-range mt-3 w-50"
             min={0}
@@ -102,7 +106,7 @@ const AudioController = ({
             value={player?.currentTime}
             step={1}
             onChange={(e) => {
-              setCurrentTime(+e.target.value);
+              setSeekTime(+e.target.value);
             }}
           />
           <span>{convertTime(player?.duration)}</span>
@@ -128,7 +132,11 @@ const AudioController = ({
             marginLeft: "2vh",
           }}
         >
-          {Math.trunc(player?.volume * 100)}%
+          {player?.volume && player?.volume > 0 ? (
+            `${Math.trunc(player?.volume * 100)}%`
+          ) : (
+            <i className="fas fa-volume-mute"></i>
+          )}
         </span>
       </div>
     </div>
@@ -144,6 +152,6 @@ export const CAudioController = connect(
     nextAudio: actions.actionFullNextTrack,
     prevAudio: actions.actionFullPrevTrack,
     setVolume: actions.actionFullSetVolume,
-    setCurrentTime: actions.actionFullSetCurrentTimeTrack,
+    setSeekTime: actions.actionFullSetSeekTimeTrack,
   }
 )(AudioController);

@@ -34,19 +34,13 @@ const MyProfile = ({
 
   return (
     <div className="ProfilePage">
-      {id === auth?.payload?.sub?.id ? (
-        <CPreloader
-          promiseName={"myUser"}
-          promiseState={promise}
-          children={<CUserInfo id={id} />}
-        />
-      ) : (
-        <CPreloader
-          promiseName={"anotherUser"}
-          promiseState={promise}
-          children={<CUserInfo id={id} />}
-        />
-      )}
+      <CPreloader
+        promiseName={`${
+          id === auth?.payload?.sub?.id ? "myUser" : "anotherUser"
+        }`}
+        promiseState={promise}
+        children={<CUserInfo id={id} />}
+      />
       {id === auth?.payload?.sub?.id ? (
         <div className="d-block mx-auto mt-2 container w-50">
           <h1>

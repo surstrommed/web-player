@@ -49,9 +49,12 @@ export const localStoredReducer =
     }
   };
 
-export const searchReducer = (state = {}, { type, ...params }) => {
+export const searchReducer = (state = {}, { type, action, ...params }) => {
   if (type === "SEARCH_RESULT") {
     return { searchResult: { ...params } };
+  }
+  if (type === "SET_SEARCH") {
+    return { setSearch: action };
   }
   return state;
 };
@@ -131,6 +134,12 @@ export const playerReducer = (
     };
   }
   if (type === "SET_CURRENT_TIME_TRACK") {
+    return {
+      ...state,
+      currentTime,
+    };
+  }
+  if (type === "SET_SEEK_TIME_TRACK") {
     return {
       ...state,
       currentTime,
