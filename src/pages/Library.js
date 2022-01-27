@@ -3,7 +3,7 @@ import { CMyPlaylists } from "../components/Playlist";
 
 const Library = ({ promise }) => {
   return (
-    <div className="SearchPage">
+    <div>
       <div className="d-block mx-auto mt-2 container w-50">
         <h1 className="mb-3 text-center">
           Ваша библиотека плейлистов с музыкой, {promise?.myUser?.payload?.nick}

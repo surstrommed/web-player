@@ -19,9 +19,11 @@ const SearchField = connect(null, {
         aria-label="Поиск"
         aria-describedby="search-addon"
         value={text}
-        onChange={(e) => setText(e.target.value)}
-        onFocus={() => {
+        onChange={(e) => {
+          setText(e.target.value);
           onChangeSearch(text);
+        }}
+        onFocus={() => {
           setSearch(true);
         }}
         onBlur={() => setSearch(false)}
@@ -48,22 +50,21 @@ const CSearchResult = connect(
   null
 )(SearchResult);
 
-const Search = ({ search, promise }) => {
+const Search = ({ search, promise, loadedTracks }) => {
   return (
-    <div className="SearchPage">
+    <div>
       <div className="d-block mx-auto mt-2 container w-50">
         <h1 className="text-center">Поиск по сайту</h1>
         <SearchField />
-        {search?.searchResult?.payload?.payload &&
-        search?.searchResult?.payload?.payload?.length !== 0 ? (
+        {search?.setSearch ? (
           <CSearchResult />
-        ) : promise?.tracks?.payload?.length !== 0 ? (
+        ) : loadedTracks?.loadedTracks?.length !== 0 ? (
           <div>
             <PlayerHeader />
             <CPreloader
               promiseName={"tracks"}
               promiseState={promise}
-              children={<CTracks tracks={promise?.tracks?.payload} />}
+              children={<CTracks tracks={loadedTracks?.loadedTracks} />}
             />
           </div>
         ) : (
@@ -84,6 +85,7 @@ export const CSearch = connect(
   (state) => ({
     search: state.search,
     promise: state.promise,
+    loadedTracks: state.loadedTracks,
   }),
   null
 )(Search);

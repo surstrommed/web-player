@@ -2,6 +2,7 @@ import { connect } from "react-redux";
 import { CAudio } from "./Audio";
 import { useState, useEffect } from "react";
 import { actionAllTracks, actionFullSkipTracks } from "../actions";
+import { skipValue } from "./../helpers/index";
 
 const Tracks = ({
   tracks,
@@ -36,7 +37,7 @@ const Tracks = ({
       0
     ) {
       setFlag(true);
-      skipAllTracks(30);
+      skipAllTracks(skipValue);
     }
   };
 

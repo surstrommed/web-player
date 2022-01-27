@@ -14,7 +14,7 @@ export const PlayerHeader = ({ personal }) => {
   return (
     <nav className={`mt-5 navbar ${offset > 50 ? "sticky" : ""}`}>
       <div className="container-fluid player-container">
-        <span>{personal ? "" : "#"}</span>
+        <span>#</span>
         <span>Название</span>
         <span>{personal ? "" : "Владелец"}</span>
       </div>

@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+export const skipValue = 30;
+
 export const jwtDecode = (token) => {
   try {
     let arrToken = token.split(".");

@@ -5,39 +5,12 @@ import * as actions from "./AudioHandler";
 
 const AudioController = ({
   player,
-  playAudio,
-  pauseAudio,
   prevAudio,
   nextAudio,
   setVolume,
   setSeekTime,
   loadAudio,
 }) => {
-  const [indexInPlaylist, setIndexInPlaylist] = useState(
-    player?.indexInPlaylist
-  );
-
-  const checkIndexInPlaylist = (type) => {
-    if (type === "prev") {
-      if (player?.playlist[indexInPlaylist - 1]) {
-        setIndexInPlaylist(indexInPlaylist - 1);
-        return indexInPlaylist;
-      } else {
-        setIndexInPlaylist(player?.playlist?.length - 1);
-        return indexInPlaylist;
-      }
-    }
-    if (type === "next") {
-      if (player?.playlist[indexInPlaylist + 1]) {
-        setIndexInPlaylist(indexInPlaylist + 1);
-        return indexInPlaylist;
-      } else {
-        setIndexInPlaylist(0);
-        return indexInPlaylist;
-      }
-    }
-  };
-
   function truncText(text) {
     if (text && text.includes(".mp3")) {
       return text.replace(".mp3", "");
@@ -62,11 +35,7 @@ const AudioController = ({
         <Button
           className="mr-2"
           disabled={player?.track ? false : true}
-          onClick={() => {
-            checkIndexInPlaylist("prev");
-            console.log(indexInPlaylist, player?.playlist[indexInPlaylist]);
-            prevAudio(indexInPlaylist, player?.playlist[indexInPlaylist]);
-          }}
+          onClick={() => prevAudio(player?.indexInPlaylist)}
         >
           <i className="fas fa-step-backward"></i>
         </Button>
@@ -83,11 +52,7 @@ const AudioController = ({
         </Button>
         <Button
           disabled={player?.track ? false : true}
-          onClick={() => {
-            checkIndexInPlaylist("next");
-            console.log(indexInPlaylist, player?.playlist[indexInPlaylist]);
-            nextAudio(indexInPlaylist, player?.playlist[indexInPlaylist]);
-          }}
+          onClick={() => nextAudio(player?.indexInPlaylist)}
         >
           <i className="fas fa-step-forward"></i>
         </Button>
@@ -149,8 +114,8 @@ export const CAudioController = connect(
     loadAudio: actions.actionFullLoadAudio,
     playAudio: actions.actionFullPlayAudio,
     pauseAudio: actions.actionFullPauseAudio,
-    nextAudio: actions.actionFullNextTrack,
-    prevAudio: actions.actionFullPrevTrack,
+    nextAudio: actions.actionNextTrack,
+    prevAudio: actions.actionPrevTrack,
     setVolume: actions.actionFullSetVolume,
     setSeekTime: actions.actionFullSetSeekTimeTrack,
   }

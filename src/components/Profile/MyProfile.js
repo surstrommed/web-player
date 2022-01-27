@@ -1,4 +1,3 @@
-import { AuthCheck } from "../AuthCheck";
 import { Spoiler } from "../Spoiler";
 import {
   backURL,
@@ -260,7 +259,7 @@ const MyProfile = ({
                         variant="secondary"
                         onClick={() => setPasswordShown(!passwordShown)}
                       >
-                        {`${passwordShown ? "Hide" : "Show"} passwords`}
+                        {`${passwordShown ? "Скрыть" : "Показать"} пароль`}
                       </Button>
                     </Col>
                   </Form.Group>

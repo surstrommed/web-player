@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 const LoginForm = ({ promise, onLogin }) => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordShown, setPasswordShown] = useState(false);
   return (
     <div className="AuthForm mx-auto mt-5">
       <Form>
@@ -18,6 +19,7 @@ const LoginForm = ({ promise, onLogin }) => {
             зарегистрироваться или повторите ещё раз.
           </Alert>
         ) : null}
+        <h1 className="text-center">Вход в аккаунт</h1>
         <Form.Group as={Row} className="mb-3" controlId="formHorizontalEmail">
           <Form.Label column sm={2}>
             Почта:
@@ -40,10 +42,17 @@ const LoginForm = ({ promise, onLogin }) => {
           </Form.Label>
           <Col sm={10}>
             <Form.Control
-              type="password"
+              type={passwordShown ? "text" : "password"}
               placeholder="Введите ваш пароль"
               onChange={(e) => setPassword(e.target.value)}
             />
+            <Button
+              className="mt-2"
+              variant="secondary"
+              onClick={() => setPasswordShown(!passwordShown)}
+            >
+              {`${passwordShown ? "Скрыть" : "Показать"} пароль`}
+            </Button>
           </Col>
         </Form.Group>
         <Form.Group as={Row} className="mb-3">

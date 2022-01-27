@@ -303,7 +303,7 @@ export function* searchWorker({ text }) {
 }
 
 function* searchWatcher() {
-  yield takeLatest("SEARCH", searchWorker);
+  yield takeEvery("SEARCH", searchWorker);
 }
 
 function* findPlaylistByOwnerWorker() {
@@ -340,7 +340,6 @@ function* findUserTracksWatcher() {
 
 function* findPlaylistTracksWorker({ _id }) {
   yield call(promiseWorker, actions.actionFindPlaylistTracks(_id));
-  window.location.reload();
 }
 
 function* findPlaylistTracksWatcher() {

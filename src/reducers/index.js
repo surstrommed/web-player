@@ -51,10 +51,10 @@ export const localStoredReducer =
 
 export const searchReducer = (state = {}, { type, action, ...params }) => {
   if (type === "SEARCH_RESULT") {
-    return { searchResult: { ...params } };
+    return { ...state, searchResult: { ...params } };
   }
   if (type === "SET_SEARCH") {
-    return { setSearch: action };
+    return { ...state, setSearch: action };
   }
   return state;
 };
@@ -105,20 +105,6 @@ export const playerReducer = (
       ...state,
       isPaused,
       isPlaying: !isPaused,
-    };
-  }
-  if (type === "PREV_TRACK") {
-    return {
-      ...state,
-      indexInPlaylist,
-      track,
-    };
-  }
-  if (type === "NEXT_TRACK") {
-    return {
-      ...state,
-      indexInPlaylist,
-      track,
     };
   }
   if (type === "SET_VOLUME") {

@@ -4,6 +4,13 @@ import { backURL } from "./../helpers/index";
 
 const audio = new Audio();
 
+window.onload = () => {
+  let { player } = store.getState();
+  if (player?.isPlaying) {
+    store.dispatch(actionFullPauseAudio(true));
+  }
+};
+
 function* audioLoadWorker({ track, playlist, indexInPlaylist }) {
   console.log("Load track");
   let { player } = yield select();
@@ -16,6 +23,8 @@ function* audioLoadWorker({ track, playlist, indexInPlaylist }) {
       yield put(actionFullPauseAudio(true));
     }
     if (player?.isPaused) {
+      audio.src = `${backURL}/${player?.track?.url}`;
+      audio.currentTime = player?.currentTime;
       yield put(actionFullPlayAudio(true));
     }
   }
@@ -32,7 +41,6 @@ function* audioPlayWorker(isPlaying) {
   console.log("Play track");
   audio.play();
   audio.ontimeupdate = (e) => {
-    console.log(e);
     store.dispatch(actionFullSetCurrentTimeTrack(e.path[0].currentTime));
   };
   yield put(actionPlayAudio(isPlaying));
@@ -52,22 +60,51 @@ export function* audioPauseWatcher() {
   yield takeEvery("FULL_PAUSE_TRACK", audioPauseWorker);
 }
 
-function* audioPrevTrackWorker(track, indexInPlaylist) {
+function* audioPrevTrackWorker({ indexInPlaylist }) {
   console.log("Prev track");
-  yield put(actionPrevTrack(track, indexInPlaylist));
+  let { player } = yield select();
+  if (player?.playlist[indexInPlaylist - 1]) {
+    indexInPlaylist -= 1;
+  } else {
+    indexInPlaylist = player?.playlist?.length - 1;
+  }
+  yield put(actionFullPauseAudio(true));
+  audio.currentTime = 0;
+  yield put(
+    actionFullLoadAudio(
+      player?.playlist[indexInPlaylist],
+      player?.playlist,
+      indexInPlaylist
+    )
+  );
 }
 
 export function* audioPrevTrackWatcher() {
-  yield takeEvery("FULL_PREV_TRACK", audioPrevTrackWorker);
+  yield takeEvery("PREV_TRACK", audioPrevTrackWorker);
 }
 
-function* audioNextTrackWorker(track, indexInPlaylist) {
+function* audioNextTrackWorker({ indexInPlaylist }) {
   console.log("Next track");
-  yield put(actionNextTrack(track, indexInPlaylist));
+  let { player } = yield select();
+  if (player?.playlist[indexInPlaylist + 1]) {
+    console.log("true");
+    indexInPlaylist += 1;
+  } else {
+    indexInPlaylist = 0;
+  }
+  yield put(actionFullPauseAudio(true));
+  audio.currentTime = 0;
+  yield put(
+    actionFullLoadAudio(
+      player?.playlist[indexInPlaylist],
+      player?.playlist,
+      indexInPlaylist
+    )
+  );
 }
 
 export function* audioNextTrackWatcher() {
-  yield takeEvery("FULL_NEXT_TRACK", audioNextTrackWorker);
+  yield takeEvery("NEXT_TRACK", audioNextTrackWorker);
 }
 
 function* audioSetCurrentTimeWorker({ currentTime }) {
@@ -142,28 +179,14 @@ export const actionFullPauseAudio = (isPaused) => ({
   isPaused,
 });
 
-export const actionPrevTrack = ({ indexInPlaylist, track }) => ({
+export const actionPrevTrack = (indexInPlaylist) => ({
   type: "PREV_TRACK",
   indexInPlaylist,
-  track,
 });
 
-export const actionFullPrevTrack = (indexInPlaylist, track) => ({
-  type: "FULL_PREV_TRACK",
-  indexInPlaylist,
-  track,
-});
-
-export const actionNextTrack = ({ indexInPlaylist, track }) => ({
+export const actionNextTrack = (indexInPlaylist) => ({
   type: "NEXT_TRACK",
   indexInPlaylist,
-  track,
-});
-
-export const actionFullNextTrack = (indexInPlaylist, track) => ({
-  type: "FULL_NEXT_TRACK",
-  indexInPlaylist,
-  track,
 });
 
 export const actionSetCurrentTimeTrack = (currentTime) => ({

@@ -8,7 +8,7 @@ import { validateEmail, validatePassword } from "./../helpers/index";
 const RegisterForm = ({ promise, auth, onRegister }) => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
-
+  const [passwordShown, setPasswordShown] = useState(false);
   return (
     <div className="AuthForm mx-auto mt-5">
       <Form>
@@ -29,6 +29,7 @@ const RegisterForm = ({ promise, auth, onRegister }) => {
             Возможно, такой пользователь уже существует.
           </Alert>
         ) : null}
+        <h1 className="text-center">Зарегистрировать аккаунт</h1>
         <Form.Group as={Row} className="mb-3" controlId="formHorizontalEmail">
           <Form.Label column sm={2}>
             Почта:
@@ -52,11 +53,17 @@ const RegisterForm = ({ promise, auth, onRegister }) => {
           </Form.Label>
           <Col sm={10}>
             <Form.Control
-              type="password"
-              required
+              type={passwordShown ? "text" : "password"}
               placeholder="Введите ваш пароль"
               onChange={(e) => setPassword(e.target.value)}
             />
+            <Button
+              className="mt-2"
+              variant="secondary"
+              onClick={() => setPasswordShown(!passwordShown)}
+            >
+              {`${passwordShown ? "Скрыть" : "Показать"} пароль`}
+            </Button>
           </Col>
         </Form.Group>
         <Form.Group as={Row} className="mb-3">
