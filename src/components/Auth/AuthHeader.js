@@ -1,16 +1,12 @@
-import { actionAuthLogout } from "../actions/index";
 import { NavDropdown } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { history, store } from "../App";
-import { backURL } from "../helpers";
+import { history, store } from "../../App";
+import { backURL } from "../../helpers";
+import { actionAuthLogout } from "../../actions/types";
 
-const Auth = ({ auth, promise, actionLogOut }) => {
-  if (
-    auth?.token &&
-    (history.location.pathname === "/login" ||
-      history.location.pathname === "/signup")
-  ) {
+const Auth = ({ auth, promise, route, actionLogOut }) => {
+  if (auth?.token && (route?.url === "/login" || route?.url === "/signup")) {
     history.push("/");
   }
   let id;
@@ -66,7 +62,7 @@ const Auth = ({ auth, promise, actionLogOut }) => {
 };
 
 export const CAuth = connect(
-  (state) => ({ auth: state.auth, promise: state.promise }),
+  (state) => ({ route: state.route, auth: state.auth, promise: state.promise }),
   {
     actionLogOut: actionAuthLogout,
   }

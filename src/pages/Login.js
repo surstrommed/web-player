@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { actionFullLogin } from "./../actions/index";
 import { Form, Row, Col, Button, Alert } from "react-bootstrap";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import { actionFullLogin } from "../actions/types";
 
 const LoginForm = ({ promise, onLogin }) => {
   const [login, setLogin] = useState("");

@@ -1,6 +1,21 @@
 import { takeEvery, put, select } from "redux-saga/effects";
-import { store } from "../App";
-import { backURL } from "./../helpers/index";
+import { store } from "../../App";
+import { backURL } from "../../helpers/index";
+import {
+  actionLoadAudio,
+  actionFullPlayAudio,
+  actionFullPauseAudio,
+  actionFullSetDuration,
+  actionFullSetCurrentTimeTrack,
+  actionNextTrack,
+  actionPlayAudio,
+  actionPauseAudio,
+  actionFullLoadAudio,
+  actionSetCurrentTimeTrack,
+  actionSetSeekTimeTrack,
+  actionSetVolume,
+  actionSetDuration,
+} from "./../../actions/types";
 
 const audio = new Audio();
 
@@ -40,8 +55,13 @@ export function* audioLoadWatcher() {
 function* audioPlayWorker(isPlaying) {
   console.log("Play track");
   audio.play();
+  let { player } = yield select();
+  audio.volume = player?.volume;
   audio.ontimeupdate = (e) => {
     store.dispatch(actionFullSetCurrentTimeTrack(e.path[0].currentTime));
+  };
+  audio.onended = () => {
+    store.dispatch(actionNextTrack(player?.indexInPlaylist));
   };
   yield put(actionPlayAudio(isPlaying));
 }
@@ -144,87 +164,3 @@ function* audioSetDurationWorker({ duration }) {
 export function* audioSetDurationWatcher() {
   yield takeEvery("FULL_SET_DURATION", audioSetDurationWorker);
 }
-
-export const actionLoadAudio = (track, playlist, indexInPlaylist) => ({
-  type: "LOAD_TRACK",
-  track,
-  playlist,
-  indexInPlaylist,
-});
-
-export const actionFullLoadAudio = (track, playlist, indexInPlaylist) => ({
-  type: "FULL_LOAD_TRACK",
-  track,
-  playlist,
-  indexInPlaylist,
-});
-
-export const actionPlayAudio = ({ isPlaying }) => ({
-  type: "PLAY_TRACK",
-  isPlaying,
-});
-
-export const actionFullPlayAudio = (isPlaying) => ({
-  type: "FULL_PLAY_TRACK",
-  isPlaying,
-});
-
-export const actionPauseAudio = ({ isPaused }) => ({
-  type: "PAUSE_TRACK",
-  isPaused,
-});
-
-export const actionFullPauseAudio = (isPaused) => ({
-  type: "FULL_PAUSE_TRACK",
-  isPaused,
-});
-
-export const actionPrevTrack = (indexInPlaylist) => ({
-  type: "PREV_TRACK",
-  indexInPlaylist,
-});
-
-export const actionNextTrack = (indexInPlaylist) => ({
-  type: "NEXT_TRACK",
-  indexInPlaylist,
-});
-
-export const actionSetCurrentTimeTrack = (currentTime) => ({
-  type: "SET_CURRENT_TIME_TRACK",
-  currentTime,
-});
-
-export const actionFullSetCurrentTimeTrack = (currentTime) => ({
-  type: "FULL_SET_CURRENT_TIME_TRACK",
-  currentTime,
-});
-
-export const actionSetSeekTimeTrack = (seekTime) => ({
-  type: "SET_SEEK_TIME_TRACK",
-  currentTime: seekTime,
-});
-
-export const actionFullSetSeekTimeTrack = (seekTime) => ({
-  type: "FULL_SET_SEEK_TIME_TRACK",
-  seekTime,
-});
-
-export const actionSetVolume = (volume) => ({
-  type: "SET_VOLUME",
-  volume,
-});
-
-export const actionFullSetVolume = (volume) => ({
-  type: "FULL_SET_VOLUME",
-  volume,
-});
-
-export const actionSetDuration = (duration) => ({
-  type: "SET_DURATION",
-  duration,
-});
-
-export const actionFullSetDuration = (duration) => ({
-  type: "FULL_SET_DURATION",
-  duration,
-});

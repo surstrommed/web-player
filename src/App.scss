@@ -2,11 +2,42 @@
 $mainColor: #0b5ed7;
 $secondaryColor: #212529;
 
+:root {
+  --flick-big-text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 8px #fff,
+    0 0 15px $mainColor, 0 0 30px $mainColor, 0 0 40px $mainColor,
+    0 0 70px $mainColor, 0 0 100px $mainColor;
+  --flick-small-text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 5px #fff,
+    0 0 11px $mainColor, 0 0 20px $mainColor, 0 0 30px $mainColor,
+    0 0 55px $mainColor, 0 0 80px $mainColor;
+}
+
 body {
   background-color: #34393d;
   color: white;
   font-family: "Catamaran", sans-serif;
   height: 150vh;
+}
+
+.Main {
+  .containerMain {
+    padding: 1rem;
+    display: block;
+    position: absolute;
+    left: 50%;
+    width: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    border: solid 2px #fff;
+    border-radius: 0.8rem;
+    box-shadow: 0 0 0.1rem #fff, 0 0 0.2rem #fff, 0 0 0.3rem rgb(0, 140, 255),
+      0 0 0.8rem rgb(52, 50, 190), 0 0 1rem rgb(43, 52, 177),
+      inset 0 0 1.3rem rgb(45, 97, 240);
+  }
+  .neon-text {
+    font-size: 2rem;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 .spoilerText {
@@ -59,10 +90,6 @@ body {
   height: 40px;
 }
 
-.MainContent {
-  margin-left: 7%;
-}
-
 .player-container {
   z-index: 1;
   margin-bottom: -72px;
@@ -105,8 +132,9 @@ body {
   left: 0;
   bottom: 0;
   .SongName {
-    margin-left: 1vh;
-    width: 25%;
+    margin-left: 5vh;
+    width: 20%;
+    font-size: 17px;
   }
   .Buttons {
     width: 70%;

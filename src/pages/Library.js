@@ -1,5 +1,5 @@
 import { connect } from "react-redux";
-import { CMyPlaylists } from "../components/Playlist";
+import { CMyPlaylists } from "../components/Playlist/Playlist";
 
 const Library = ({ promise }) => {
   return (

@@ -6,7 +6,7 @@ import {
   CDBSidebarMenuItem,
 } from "cdbreact";
 import { NavLink } from "react-router-dom";
-import { Logo } from "./Logo";
+import { Logo } from "../Other/Logo";
 
 export const Sidebar = () => {
   return (
@@ -40,12 +40,3 @@ export const Sidebar = () => {
     </div>
   );
 };
-
-// <CDBSidebarFooter
-// className="m-1"
-// style={{
-//   textAlign: "center",
-// }}
-// >
-// Navy Web Player
-// </CDBSidebarFooter>

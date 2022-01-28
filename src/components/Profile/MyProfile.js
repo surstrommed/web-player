@@ -1,21 +1,21 @@
-import { Spoiler } from "../Spoiler";
+import { Spoiler } from "../Other/Spoiler";
 import {
   backURL,
   validateEmail,
   validatePassword,
   validateNickname,
 } from "../../helpers/index";
-import {
-  actionSetNickname,
-  actionSetEmail,
-  actionSetNewPassword,
-} from "../../actions/index";
-import { CMyDropzone } from "../Dropzone";
+import { CMyDropzone } from "../Other/Dropzone";
 import { Form, Alert, Row, Col, Button } from "react-bootstrap";
 import { useState } from "react";
 import { connect } from "react-redux";
 import { CUserInfo } from "./UserInfo";
-import { CPreloader } from "./../Preloader";
+import { CPreloader } from "../Other/Preloader";
+import {
+  actionSetNickname,
+  actionSetEmail,
+  actionSetNewPassword,
+} from "./../../actions/types";
 
 const MyProfile = ({
   id,
@@ -57,6 +57,7 @@ const MyProfile = ({
                   method="post"
                   encType="multipart/form-data"
                   id="form"
+                  className="text-center"
                 >
                   <img
                     className="avatarProfile"
@@ -92,7 +93,7 @@ const MyProfile = ({
                     className="m-2"
                     controlId="formHorizontalEmail"
                   >
-                    <Form.Label column sm={2}>
+                    <Form.Label column sm={5}>
                       Ваш никнейм:
                     </Form.Label>
                     <Col sm={10}>
@@ -113,7 +114,7 @@ const MyProfile = ({
                     className="m-2"
                     controlId="formHorizontalEmail"
                   >
-                    <Form.Label column sm={2}>
+                    <Form.Label column sm={5}>
                       Новый никнейм:
                     </Form.Label>
                     <Col sm={10}>
@@ -168,7 +169,7 @@ const MyProfile = ({
                     className="m-2"
                     controlId="formHorizontalEmail"
                   >
-                    <Form.Label column sm={2}>
+                    <Form.Label column sm={5}>
                       Ваша почта:
                     </Form.Label>
                     <Col sm={10}>
@@ -185,7 +186,7 @@ const MyProfile = ({
                     className="m-2"
                     controlId="formHorizontalEmail"
                   >
-                    <Form.Label column sm={2}>
+                    <Form.Label column sm={5}>
                       Новая почта:
                     </Form.Label>
                     <Col sm={10}>
@@ -245,7 +246,7 @@ const MyProfile = ({
                     className="m-2"
                     controlId="formHorizontalPassword"
                   >
-                    <Form.Label column sm={2}>
+                    <Form.Label column sm={5}>
                       Пароль:
                     </Form.Label>
                     <Col sm={10}>
@@ -268,7 +269,7 @@ const MyProfile = ({
                     className="m-2"
                     controlId="formHorizontalPassword"
                   >
-                    <Form.Label column sm={2}>
+                    <Form.Label column sm={5}>
                       Новый пароль:
                     </Form.Label>
                     <Col sm={10}>
@@ -303,6 +304,7 @@ const MyProfile = ({
           />
         </div>
       ) : null}
+      <div className="container" style={{ height: "300px" }}></div>
     </div>
   );
 };

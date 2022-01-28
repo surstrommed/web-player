@@ -1,9 +1,8 @@
 import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
-import { backURL } from "../helpers/index";
+import { backURL } from "../../helpers/index";
 import { Link } from "react-router-dom";
-import * as actions from "./AudioHandler";
-import { skipValue } from "./../helpers/index";
+import * as actions from "./../../actions/types";
 
 const AudioTrack = ({
   personal,
@@ -31,7 +30,7 @@ const AudioTrack = ({
           {route.url === "/search"
             ? index + 1 + loadedTracks?.skipTracks
             : index + 1}{" "}
-          |
+          |{" "}
           <span>
             {track?.originalFileName
               ? truncText(track?.originalFileName)
@@ -39,7 +38,16 @@ const AudioTrack = ({
           </span>
         </span>
       </div>
-      <Button onClick={() => loadAudio(track, playlist, index)}>
+      <Button
+        variant={`${
+          track._id === player?.track?._id && player?.isPlaying
+            ? "success"
+            : track._id === player?.track?._id && player?.isPaused
+            ? "danger"
+            : "primary"
+        }`}
+        onClick={() => loadAudio(track, playlist, index)}
+      >
         <i
           className={`fas ${
             track._id === player?.track?._id && player?.isPlaying
@@ -49,7 +57,13 @@ const AudioTrack = ({
         ></i>
       </Button>
       <a
-        className="btn btn-primary h-50 ml-1 my-auto"
+        className={`btn btn-${
+          track._id === player?.track?._id && player?.isPlaying
+            ? "success"
+            : track._id === player?.track?._id && player?.isPaused
+            ? "danger"
+            : "primary"
+        } h-50 ml-1 my-auto`}
         href={`${backURL}/${track?.url}`}
         role="button"
       >

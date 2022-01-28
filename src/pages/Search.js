@@ -1,9 +1,9 @@
 import { connect } from "react-redux";
-import { CTracks } from "../components/Tracks";
-import { PlayerHeader } from "./../components/PlayerHeader";
+import { CTracks } from "../components/Playlist/SearchTracks";
+import { PlayerHeader } from "../components/Playlist/PlayerHeader";
 import { useState } from "react";
-import { actionSearch, actionSetSearch } from "./../actions/index";
-import { CPreloader } from "./../components/Preloader";
+import { CPreloader } from "../components/Other/Preloader";
+import { actionSearch, actionSetSearch } from "../actions/types";
 
 const SearchField = connect(null, {
   onChangeSearch: actionSearch,
@@ -11,23 +11,34 @@ const SearchField = connect(null, {
 })(({ onChangeSearch, setSearch }) => {
   const [text, setText] = useState("");
   return (
-    <div className="input-group rounded">
+    <div className="input-group mb-3">
       <input
-        type="search"
-        className="form-control rounded"
+        type="text"
+        className="form-control"
         placeholder="Поиск по всей музыке"
         aria-label="Поиск"
-        aria-describedby="search-addon"
-        value={text}
+        aria-describedby="basic-addon2"
+        onFocus={() => {
+          setSearch(true);
+        }}
         onChange={(e) => {
           setText(e.target.value);
           onChangeSearch(text);
         }}
-        onFocus={() => {
-          setSearch(true);
-        }}
-        onBlur={() => setSearch(false)}
+        value={text}
       />
+      <div className="input-group-append">
+        <button
+          className="btn btn-dark"
+          type="button"
+          onClick={() => {
+            setSearch(false);
+            setText("");
+          }}
+        >
+          Отменить
+        </button>
+      </div>
     </div>
   );
 });

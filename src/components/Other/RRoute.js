@@ -1,6 +1,6 @@
 import { connect } from "react-redux";
-import { Route, Redirect } from "react-router-dom";
-import { AuthCheck } from "./AuthCheck";
+import { Route } from "react-router-dom";
+import { AuthCheck } from "../Auth/AuthCheck";
 
 const RRoute = ({ action, component: Component, ...routeProps }) => {
   const WrapperComponent = (componentProps) => {

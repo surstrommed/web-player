@@ -2,8 +2,8 @@ import React from "react";
 import { Navbar, Container, Nav, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
-import { CAuth } from "../pages/Auth";
-import { history } from "./../App";
+import { CAuth } from "../Auth/AuthHeader";
+import { history } from "../../App";
 
 export const Header = () => {
   return (

@@ -1,20 +1,23 @@
 import React from "react";
-import { Route, Switch, withRouter } from "react-router-dom";
-import { CLoginForm } from "../pages/Login";
-import { CSignUpForm } from "../pages/Register";
-import { Page404 } from "../pages/Page404";
-import { CSearch } from "./../pages/Search";
-import { CLibrary } from "./../pages/Library";
-import { CProfile } from "./../pages/Profile";
-import { MyPlaylistTracks } from "./Playlist";
-import { CProtectedRoute, CRRoute } from "./RRoute";
+import { Switch, withRouter } from "react-router-dom";
+import { CProtectedRoute, CRRoute } from "./../Other/RRoute";
+import { CProfile } from "./../../pages/Profile";
+import { CLibrary } from "./../../pages/Library";
+import { CSearch } from "./../../pages/Search";
+import { Page404 } from "./../../pages/Page404";
+import { CSignUpForm } from "./../../pages/Register";
+import { CLoginForm } from "./../../pages/Login";
+import { MyPlaylistTracks } from "./../Playlist/Playlist";
+import gif from "../../images/gifka.gif";
 
 const Content = ({ children }) => <div className="Content">{children}</div>;
-
 const PageMain = () => {
   return (
-    <div className="MainContent">
-      <h1 className="text-center">Главная страница</h1>
+    <div className="Main text-center">
+      <div class="containerMain mt-5">
+        <h1 className="neon-text">Добро пожаловать в Navy Web Player!</h1>
+      </div>
+      <img src={gif} alt="background" style={{ width: "30%", height: "30%" }} />
     </div>
   );
 };

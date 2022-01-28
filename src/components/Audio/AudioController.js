@@ -1,7 +1,6 @@
 import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
-import { useState } from "react";
-import * as actions from "./AudioHandler";
+import * as actions from "./../../actions/types";
 
 const AudioController = ({
   player,
@@ -25,7 +24,6 @@ const AudioController = ({
       ? "00:00"
       : `${minutes}:${formatSeconds}`;
   }
-
   return (
     <div className="AudioController">
       <span className="SongName">

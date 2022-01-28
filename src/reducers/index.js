@@ -33,6 +33,7 @@ export function authReducer(state, { type, token }) {
   }
   if (type === "AUTH_LOGOUT") {
     localStorage.removeItem("authToken");
+    window.location.reload();
     return {};
   }
   return state;
@@ -167,7 +168,3 @@ export function scrollTracksReducer(
   }
   return state;
 }
-
-// loadedTracks:state?.loadedTracks
-//         ? [...state.loadedTracks, ...newTracks]
-//         : [...newTracks],

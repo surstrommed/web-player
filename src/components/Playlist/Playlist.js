@@ -1,19 +1,18 @@
 import { useState } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import { CMyDropzone } from "./Dropzone";
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
+import { arrayMoveImmutable } from "array-move";
+import { CAudio } from "./../Audio/Audio";
+import { PlayerHeader } from "./PlayerHeader";
+import { CPreloader } from "./../Other/Preloader";
+import { CMyDropzone } from "./../Other/Dropzone";
 import {
   actionCreateNewPlaylist,
   actionTracksToPlaylist,
-} from "./../actions/index";
-import { SortableContainer, SortableElement } from "react-sortable-hoc";
-import { arrayMoveImmutable } from "array-move";
-import { CAudio } from "./Audio";
-import { history } from "./../App";
-import { CPreloader } from "./Preloader";
-import { PlayerHeader } from "./PlayerHeader";
+} from "../../actions/types";
 
-const PlaylistTrackItem = ({ track, index, key, playlist }) => {
+const PlaylistTrackItem = ({ track, key, playlist }) => {
   return (
     <div className="d-block mx-auto mt-2 container w-50" key={key}>
       <CAudio track={track} playlist={playlist} personal />
@@ -42,10 +41,12 @@ const PlaylistTracksList = ({ playlistTracks }) => {
 
 const SortableList = SortableContainer(PlaylistTracksList);
 
-const TracksInPlaylistSortable = ({ playlistTracks, loadTracksToPlaylist }) => {
-  let idPlaylist = history.location.pathname.substring(
-    history.location.pathname.lastIndexOf("/") + 1
-  );
+const TracksInPlaylistSortable = ({
+  route,
+  playlistTracks,
+  loadTracksToPlaylist,
+}) => {
+  let idPlaylist = route?.params?._id;
   const [newPlaylistTracks, setNewPlaylistTracks] = useState(playlistTracks);
   const onSortEnd = (e) => {
     var newChangedPlaylistTracks = arrayMoveImmutable(
@@ -65,7 +66,7 @@ const TracksInPlaylistSortable = ({ playlistTracks, loadTracksToPlaylist }) => {
   );
 };
 
-const CTracksInPlaylistSortable = connect(null, {
+const CTracksInPlaylistSortable = connect((state) => ({ route: state.route }), {
   loadTracksToPlaylist: actionTracksToPlaylist,
 })(TracksInPlaylistSortable);
 
@@ -86,7 +87,8 @@ const PlaylistTracks = ({ promise, tracks: { _id, url } = {} }) => {
         promiseState={promise}
         children={null}
       />
-      {promise?.playlistTracks?.payload?.tracks ? null : (
+      {promise?.playlistTracks?.status === "RESOLVED" &&
+      promise?.playlistTracks?.payload?.tracks?.length !== 0 ? null : (
         <h2 className="mt-5 text-center">
           {promise?.myUser?.payload?.nick
             ? promise?.myUser?.payload?.nick
@@ -109,10 +111,17 @@ export const MyPlaylistTracks = connect(
 )(({ promise }) => {
   return (
     <div>
-      <h3 className="text-center">
+      <h3 className="text-center mb-3">
         Перетащите аудио файл(-ы) для загрузки в этот плейлист.
       </h3>
-      <CMyDropzone />
+      <CPreloader
+        promiseName={"playlistTracks"}
+        promiseState={promise}
+        children={<CMyDropzone />}
+      />
+      <h6 className="text-center mt-3">
+        Максимальное количество треков в плейлисте - 100 штук.
+      </h6>
       <div className="d-block mx-auto mt-2 container w-50">
         {promise?.playlistTracks?.payload?.tracks &&
         promise?.playlistTracks?.payload?.tracks?.length !== 0 ? (
@@ -149,13 +158,13 @@ const MyPlaylists = ({ promise, onPlaylistCreate }) => {
             onChange={(e) => setPlaylist(e.target.value)}
           />
           <div id="playlistHelp" className="form-text">
-            Название плейлиста может быть от 2 до 10 символов.
+            Название плейлиста может быть от 2 до 15 символов.
           </div>
         </div>
         <button
           type="submit"
           className="btn btn-primary"
-          disabled={playlist.length > 1 && playlist.length < 11 ? false : true}
+          disabled={playlist.length > 1 && playlist.length < 16 ? false : true}
           onClick={() => onPlaylistCreate(playlist)}
         >
           Создать
@@ -169,6 +178,7 @@ const MyPlaylists = ({ promise, onPlaylistCreate }) => {
           ))}
         </ul>
       </div>
+      <div className="container" style={{ height: "300px" }}></div>
     </>
   );
 };

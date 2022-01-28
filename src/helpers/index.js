@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { states } from "../App";
 
 export const skipValue = 30;
 
@@ -50,32 +50,60 @@ export function validateNickname(nick) {
 
 export const delay = (ms) => new Promise((ok) => setTimeout(() => ok(ms), ms));
 
-export const useLocalStoredState = (defaultState, localStorageName) => {
-  let payload;
-  try {
-    payload = JSON.parse(localStorage[localStorageName]);
-  } catch {
-    payload = defaultState;
-  }
-  const [state, setState] = useState(payload);
-  return [
-    state,
-    (newState) => {
-      setState(newState);
-      localStorage.setItem(localStorageName, newState);
-    },
-  ];
+export const queries = {
+  "/profile/:_id": (match) => ({
+    name: `${
+      match.params._id === states?.auth?.payload?.sub?.id
+        ? "myUser"
+        : "anotherUser"
+    }`,
+    query: `query findUser($q:String){
+      UserFindOne(query:$q){
+        _id login nick createdAt avatar {
+          _id url
+        }
+      }
+    }
+`,
+    variables: { q: JSON.stringify([{ ___owner: match.params._id }]) },
+  }),
+  "/myplaylist/:_id": (match) => ({
+    name: "playlistTracks",
+    query: `query playlistTracks($q:String) {
+      PlaylistFindOne(query:$q) {
+      _id name tracks {_id url originalFileName} owner {_id login}
+      }
+     }`,
+    variables: { q: JSON.stringify([{ _id: match.params._id }]) },
+  }),
 };
 
-export const useProxyState = (defaultState) => {
-  const [state, setState] = useState(defaultState);
-  return new Proxy(state, {
-    get(obj, key) {
-      return obj[key];
-    },
-    set(obj, key, value) {
-      setState({ ...obj, [key]: value });
-      return true;
-    },
-  });
-};
+// export const useLocalStoredState = (defaultState, localStorageName) => {
+//   let payload;
+//   try {
+//     payload = JSON.parse(localStorage[localStorageName]);
+//   } catch {
+//     payload = defaultState;
+//   }
+//   const [state, setState] = useState(payload);
+//   return [
+//     state,
+//     (newState) => {
+//       setState(newState);
+//       localStorage.setItem(localStorageName, newState);
+//     },
+//   ];
+// };
+
+// export const useProxyState = (defaultState) => {
+//   const [state, setState] = useState(defaultState);
+//   return new Proxy(state, {
+//     get(obj, key) {
+//       return obj[key];
+//     },
+//     set(obj, key, value) {
+//       setState({ ...obj, [key]: value });
+//       return true;
+//     },
+//   });
+// };

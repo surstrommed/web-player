@@ -1,12 +1,11 @@
 import { connect } from "react-redux";
-import { CAudio } from "./Audio";
 import { useState, useEffect } from "react";
-import { actionAllTracks, actionFullSkipTracks } from "../actions";
-import { skipValue } from "./../helpers/index";
+import { skipValue } from "../../helpers/index";
+import { CAudio } from "../Audio/Audio";
+import { actionAllTracks, actionFullSkipTracks } from "../../actions/types";
 
 const Tracks = ({
   tracks,
-  skip,
   getAllTracks,
   skipAllTracks,
   search,
@@ -17,7 +16,7 @@ const Tracks = ({
   useEffect(() => {
     if (flag) {
       window.scrollTo(0, 0);
-      getAllTracks(skip);
+      getAllTracks(skipValue);
       setFlag(false);
     }
   }, [flag]);
@@ -43,23 +42,14 @@ const Tracks = ({
 
   return (
     <>
-      {search
-        ? (searchResults || []).map((track, index) => (
-            <CAudio
-              track={track}
-              index={index}
-              playlist={searchResults}
-              key={track._id}
-            />
-          ))
-        : (tracks || []).map((track, index) => (
-            <CAudio
-              track={track}
-              index={index}
-              playlist={tracks}
-              key={track._id}
-            />
-          ))}
+      {(search ? searchResults || [] : tracks || []).map((track, index) => (
+        <CAudio
+          track={track}
+          index={index}
+          playlist={search ? searchResults : tracks}
+          key={track._id}
+        />
+      ))}
     </>
   );
 };

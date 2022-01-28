@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { actionFullRegister } from "./../actions/index";
 import { Form, Row, Col, Button, Alert } from "react-bootstrap";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { validateEmail, validatePassword } from "./../helpers/index";
+import { actionFullRegister } from "./../actions/types";
 
 const RegisterForm = ({ promise, auth, onRegister }) => {
   const [login, setLogin] = useState("");

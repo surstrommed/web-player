@@ -13,76 +13,56 @@ const InfoRender = ({ avatar, nick, date }) => {
   ];
   return (
     <>
-    {date ? <div className="text-center">
-    <h1 className="text-center">Информация о профиле пользователя:</h1>
-      <div>
-        <img
-          style={{ width: "6rem" }}
-          src={
-            avatar
-              ? `${backURL}/${avatar}`
-              : "https://i.ibb.co/bBxzmTm/default-avatar.jpg"
-          }
-          className="card-img-top"
-          alt="ProfileImage"
-        />
-      </div>
-      <div>Никнейм: {nick}</div>
-      <div>Дата регистрации: {dmy.join(".")}</div>
-    </div> : <Page404 />}
+      {date ? (
+        <div className="text-center">
+          <h1 className="text-center">Информация о профиле пользователя:</h1>
+          <div>
+            <img
+              style={{ width: "6rem" }}
+              src={
+                avatar
+                  ? `${backURL}/${avatar}`
+                  : "https://i.ibb.co/bBxzmTm/default-avatar.jpg"
+              }
+              className="card-img-top"
+              alt="ProfileImage"
+            />
+          </div>
+          <div>Никнейм: {nick}</div>
+          <div>Дата регистрации: {dmy.join(".")}</div>
+        </div>
+      ) : (
+        <Page404 />
+      )}
     </>
   );
 };
 
 const UserInfo = ({ id, auth, promise }) => {
   return (
-    <>
-      {id === auth?.payload?.sub?.id ? (
-        <InfoRender
-          avatar={promise?.myUser?.payload?.avatar?.url}
-          nick={promise?.myUser?.payload?.nick}
-          date={promise?.myUser?.payload?.createdAt}
-        />
-      ) : (
-        <InfoRender
-          avatar={promise?.anotherUser?.payload?.avatar?.url}
-          nick={
-            promise?.anotherUser?.payload?.nick
-              ? promise?.anotherUser?.payload?.nick
-              : promise?.anotherUser?.payload?.login
-          }
-          date={promise?.anotherUser?.payload?.createdAt}
-        />
-      )}
-    </>
+    <InfoRender
+      avatar={
+        id === auth?.payload?.sub?.id
+          ? promise?.myUser?.payload?.avatar?.url
+          : promise?.anotherUser?.payload?.avatar?.url
+      }
+      nick={
+        id === auth?.payload?.sub?.id
+          ? promise?.myUser?.payload?.nick
+          : promise?.anotherUser?.payload?.nick
+          ? promise?.anotherUser?.payload?.nick
+          : promise?.anotherUser?.payload?.login
+      }
+      date={
+        id === auth?.payload?.sub?.id
+          ? promise?.myUser?.payload?.createdAt
+          : promise?.anotherUser?.payload?.createdAt
+      }
+    />
   );
 };
-
-// {promise?.myTracks?.status === "RESOLVED" ||
-//       promise?.anotherUserTracks?.status === "RESOLVED" ? (
-//         id === auth?.payload?.sub?.id ? (
-//           promise?.myTracks?.payload ? (
-//             <InfoRender
-//               avatar={promise?.myUser?.payload?.avatar?.url}
-//               nick={promise?.myUser?.payload?.nick}
-//               tracksCount={promise?.myTracks?.payload?.length}
-//             />
-//           ) : null
-//         ) : promise?.anotherUserTracks?.payload ? (
-//           <InfoRender
-//             avatar={promise?.anotherUser?.payload?.avatar?.url}
-//             nick={promise?.anotherUser?.payload?.nick}
-//             tracksCount={promise?.anotherUserTracks?.payload?.length}
-//           />
-//         ) : null
-//       ) : (
-//         <Loader />
-//       )}
 
 export const CUserInfo = connect(
   (state) => ({ auth: state.auth, promise: state.promise }),
   null
 )(UserInfo);
-
-// findMyTracks: actionFindMyTracks,
-// findAnotherUserTracks: actionFindAnotherUserTracks,
