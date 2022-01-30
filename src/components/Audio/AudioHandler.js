@@ -29,7 +29,7 @@ window.onload = () => {
 function* audioLoadWorker({ track, playlist, indexInPlaylist }) {
   console.log("Load track");
   let { player } = yield select();
-  if (player?.indexInPlaylist !== indexInPlaylist) {
+  if (player?.track?._id !== track?._id) {
     yield put(actionLoadAudio(track, playlist, indexInPlaylist));
     audio.src = `${backURL}/${track?.url}`;
     yield put(actionFullPlayAudio(true));
