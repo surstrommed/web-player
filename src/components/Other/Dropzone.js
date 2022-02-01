@@ -3,8 +3,9 @@ import { useDropzone } from "react-dropzone";
 import { connect } from "react-redux";
 import { actionSetAvatar, actionUploadTracks } from "../../actions/types";
 
-const MyDropzone = ({ promise, onloadAvatar, onloadMusic }) => {
-  const [error, setError] = useState(false);
+const MyDropzone = ({ route, promise, onloadAvatar, onloadMusic }) => {
+  const [tracksError, setTracksError] = useState(false);
+  const [typeError, setTypeError] = useState(false);
   const onDrop = useCallback(
     (acceptedFiles) => {
       if (acceptedFiles[0].type.includes("audio")) {
@@ -15,14 +16,22 @@ const MyDropzone = ({ promise, onloadAvatar, onloadMusic }) => {
               : 0) <
           100
         ) {
-          for (let i = 0; i < acceptedFiles.length; i++) {
-            onloadMusic(acceptedFiles[i]);
+          if (route?.path.includes("myplaylist")) {
+            for (let i = 0; i < acceptedFiles.length; i++) {
+              onloadMusic(acceptedFiles[i]);
+            }
+          } else {
+            setTypeError(true);
           }
         } else {
-          setError(true);
+          setTracksError(true);
         }
       } else {
-        onloadAvatar(acceptedFiles[0]);
+        if (route?.path.includes("profile")) {
+          onloadAvatar(acceptedFiles[0]);
+        } else {
+          setTypeError(true);
+        }
       }
     },
     [onloadAvatar, onloadMusic]
@@ -32,18 +41,20 @@ const MyDropzone = ({ promise, onloadAvatar, onloadMusic }) => {
   return (
     <div
       className={`${
-        error ? "text-danger" : null
+        tracksError || typeError ? "text-danger" : null
       } mt-2 text-center customBorder mx-auto`}
       {...getRootProps()}
     >
       <input {...getInputProps()} />
-      {isDragActive ? setError(false) : null}
+      {isDragActive ? (setTypeError(false), setTracksError(false)) : null}
       {isDragActive ? (
         <p>Поместите файлы сюда...</p>
       ) : (
         <p>
-          {error
+          {tracksError
             ? "Ошибка! Максимально допустимое количество треков в плейлисте - 100 штук."
+            : typeError
+            ? "Ошибка! Недопустимый тип файла для загрузки!"
             : "Для загрузки перетащите файлы сюда или нажмите на поле и выберите их локально."}
         </p>
       )}
@@ -51,7 +62,10 @@ const MyDropzone = ({ promise, onloadAvatar, onloadMusic }) => {
   );
 };
 
-export const CMyDropzone = connect((state) => ({ promise: state.promise }), {
-  onloadAvatar: actionSetAvatar,
-  onloadMusic: actionUploadTracks,
-})(MyDropzone);
+export const CMyDropzone = connect(
+  (state) => ({ promise: state.promise, route: state.route }),
+  {
+    onloadAvatar: actionSetAvatar,
+    onloadMusic: actionUploadTracks,
+  }
+)(MyDropzone);

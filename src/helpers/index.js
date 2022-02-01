@@ -77,33 +77,3 @@ export const queries = {
     variables: { q: JSON.stringify([{ _id: match.params._id }]) },
   }),
 };
-
-// export const useLocalStoredState = (defaultState, localStorageName) => {
-//   let payload;
-//   try {
-//     payload = JSON.parse(localStorage[localStorageName]);
-//   } catch {
-//     payload = defaultState;
-//   }
-//   const [state, setState] = useState(payload);
-//   return [
-//     state,
-//     (newState) => {
-//       setState(newState);
-//       localStorage.setItem(localStorageName, newState);
-//     },
-//   ];
-// };
-
-// export const useProxyState = (defaultState) => {
-//   const [state, setState] = useState(defaultState);
-//   return new Proxy(state, {
-//     get(obj, key) {
-//       return obj[key];
-//     },
-//     set(obj, key, value) {
-//       setState({ ...obj, [key]: value });
-//       return true;
-//     },
-//   });
-// };

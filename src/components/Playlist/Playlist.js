@@ -111,8 +111,11 @@ export const MyPlaylistTracks = connect(
 )(({ promise }) => {
   return (
     <div>
-      <h3 className="text-center mb-3">
-        Перетащите аудио файл(-ы) для загрузки в этот плейлист.
+      <h1 className="text-center">
+        Плейлист {promise?.playlistTracks?.payload?.name || ""}
+      </h1>
+      <h3 className="text-center my-5">
+        Перетащите аудио файл(-ы) для загрузки в этот плейлист:
       </h3>
       <CPreloader
         promiseName={"playlistTracks"}

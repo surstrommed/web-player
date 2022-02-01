@@ -25,9 +25,6 @@ export const Sidebar = () => {
         </CDBSidebarHeader>
         <CDBSidebarContent className="sidebar-content">
           <CDBSidebarMenu>
-            {/*<NavLink exact to="/" activeClassName="activeClicked">
-              <CDBSidebarMenuItem icon="columns">Главная</CDBSidebarMenuItem>
-            </NavLink>*/}
             <NavLink exact to="/search" activeClassName="activeClicked">
               <CDBSidebarMenuItem icon="search">Поиск</CDBSidebarMenuItem>
             </NavLink>
