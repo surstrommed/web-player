@@ -10,6 +10,7 @@
 
 # production
 /build
+/navy
 
 # misc
 .DS_Store

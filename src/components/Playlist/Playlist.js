@@ -49,7 +49,7 @@ const TracksInPlaylistSortable = ({
   let idPlaylist = route?.params?._id;
   const [newPlaylistTracks, setNewPlaylistTracks] = useState(playlistTracks);
   const onSortEnd = (e) => {
-    var newChangedPlaylistTracks = arrayMoveImmutable(
+    let newChangedPlaylistTracks = arrayMoveImmutable(
       newPlaylistTracks,
       e.oldIndex,
       e.newIndex
@@ -61,6 +61,7 @@ const TracksInPlaylistSortable = ({
     );
     loadTracksToPlaylist(idPlaylist, newChangedPlaylistIdTracks);
   };
+
   return (
     <SortableList playlistTracks={newPlaylistTracks} onSortEnd={onSortEnd} />
   );
